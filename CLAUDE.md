@@ -23,7 +23,8 @@ the project log. Read it before proposing work, and update it whenever a decisio
 - **Clean, readable code** over clever code. Small, tested steps, one feature at a time.
 - Record decisions as `D#` entries in `PLAN.md`, with the reason. IDs are never reused
   or renumbered; dropped items are struck through.
-- Don't commit or push unless asked.
+- Commit and push meaningful changes without asking, **after** the privacy check below.
+  Commit messages explain *why*. If the check finds anything personal, stop and ask.
 
 ## Device safety rules
 
@@ -35,6 +36,8 @@ the project log. Read it before proposing work, and update it whenever a decisio
 - Eject safely (`udisksctl unmount` then `udisksctl power-off`), then the user unplugs.
   The Kobo stays on its "connected" screen until the cable is physically removed.
 - If USB misbehaves, suspect the cable first.
+- The Kobo reads `.kobo/Kobo/Kobo eReader.conf` **only at startup**: restart it after editing.
+- The device runs firmware 4.38.23429 in **Sideloaded Mode** (`SideloadedMode=true`), with no Kobo account.
 - The Kobo mounts at `/run/media/$USER/KOBOeReader`; device files live in `.kobo/`.
 
 ## Legal and ethical rules

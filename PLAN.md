@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phase 0 done. Phase 1, Requirements (waiting for your approval). No code yet.
+> **Status:** Phases 0–1 done. Phase 2 (feasibility spikes) in progress: Spike A, bold-start sample.
 > **Last updated:** 2026-10-23
 
 ## 1. Vision
@@ -103,8 +103,8 @@ Each phase has a **definition of done**, the test of whether we can move on.
 
 | Phase | Work | Definition of done |
 |---|---|---|
-| 0. Discovery | Get USB working, record device details | The computer sees the Kobo and its details are recorded |
-| 1. Requirements | This document | You approve sections 3–5 |
+| 0. Discovery ✅ | Get USB working, record device details | The computer sees the Kobo and its details are recorded |
+| 1. Requirements ✅ | This document | You approve sections 3–5 (approved 2026-10-23) |
 | 2. Feasibility spikes | Small throwaway experiments: install KOReader; test bold text on the Glo's screen; test PDF conversion | Each risky unknown is answered "yes", "no" or "yes, but…" |
 | 3. Design | Folder layout, config file format, how the pipeline steps connect | Written design you understand and approve |
 | 4. Setup | git repo, public GitHub repo `Kobo-FOMO` (started early), Python project, tests | Empty but working project skeleton on GitHub |
@@ -177,3 +177,7 @@ A short diary of what actually happened, so future-us knows *why* things are the
   means wait.** Nickel then showed "You haven't synced your eReader". Added `SideloadedMode=true` to
   `[ApplicationPreferences]` in `.kobo/Kobo/Kobo eReader.conf` (backup in
   `backups/2026-10-23-before-sideloaded-mode/`).
+- **2026-10-23:** The firmware rejected the placeholder user ("critical error"), so we tapped **Sign out**,
+  which reset the Kobo to setup. Re-added `SideloadedMode=true`, then **restarted** the Kobo. It went
+  straight to the home screen with no account and no pop-ups. **Lesson: the Kobo reads its settings
+  file only at startup, so restart after editing it.** R1 (no Kobo account) is achieved.
