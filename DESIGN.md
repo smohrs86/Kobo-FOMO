@@ -322,6 +322,8 @@ boldstart/              the reusable engine (D8). Knows nothing about Kobos
   epub.py               bold / unbold a whole EPUB
 kraken/
   cli.py                the commands (section 3)
+  push.py               the steps of `kraken push`: find, plan, apply, eject, notify
+  lock.py               "busy, wait your turn" (flock, D34)
   settings.py           reads settings.toml, creates it with defaults
   inbox.py              finds waiting files; files them in sent/ or skipped/
   convert.py            one converter per format, plus the PDF ladder

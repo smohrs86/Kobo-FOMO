@@ -10,6 +10,7 @@ import hashlib
 import os
 import re
 import shutil
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -198,3 +199,21 @@ def delete_from_kobo(kobo: Kobo, destination: Path) -> None:
         _flush_folder(target.parent)
     except OSError as error:
         raise KoboError(f"Deleting {destination} from the Kobo failed: {error.strerror}.") from error
+
+
+def eject(kobo: Kobo) -> None:
+    """Eject the Kobo safely: unmount it, then power it off. The same two steps as doing it by hand.
+
+    Unmounting also makes Linux finish writing anything still waiting in memory. If it fails (for
+    example because a file manager has the Kobo open), the Kobo isn't powered off.
+    """
+    for action in ("unmount", "power-off"):
+        # --no-user-interaction: fail straight away rather than wait for a password prompt nobody sees.
+        command = ["udisksctl", action, "--block-device", str(kobo.device), "--no-user-interaction"]
+        try:
+            completed = subprocess.run(command, capture_output=True, text=True, timeout=60)
+        except (OSError, subprocess.SubprocessError) as error:
+            raise KoboError(f"Couldn't eject the Kobo: {error}") from error
+        if completed.returncode != 0:
+            reason = completed.stderr.strip() or f"udisksctl {action} failed"
+            raise KoboError(f"Couldn't eject the Kobo ({reason}). Eject it from the file manager before unplugging.")

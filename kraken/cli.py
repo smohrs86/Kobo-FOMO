@@ -4,10 +4,14 @@ Each subcommand is added in the milestone that builds it (D30).
 """
 
 import argparse
+import logging
 from collections.abc import Callable
 
 from kraken import __version__
 from kraken.fonts import PicksError, catalogue_dir, read_catalogue, read_picks, write_picks
+from kraken.lock import BusyError
+from kraken.push import run_push
+from kraken.settings import SettingsError, state_dir
 
 # --- kraken fonts (D25, D31) ---
 
@@ -90,6 +94,10 @@ def build_parser() -> argparse.ArgumentParser:
     fonts = commands.add_parser("fonts", help="choose which fonts go on the Kobo")
     fonts.set_defaults(run=run_fonts)
 
+    push = commands.add_parser("push", help="send fonts to the Kobo, then eject it")
+    push.add_argument("--dry-run", action="store_true", help="show what push would do, without doing it")
+    push.set_defaults(run=lambda args: run_push(dry_run=args.dry_run))
+
     return parser
 
 
@@ -100,8 +108,24 @@ def main(argv: list[str] | None = None) -> int:
     if not hasattr(args, "run"):  # no subcommand given
         parser.print_help()
         return 0
+    start_log()
     try:
         return args.run(args)
-    except PicksError as error:
+    except (BusyError, PicksError, SettingsError) as error:
         print(f"kraken: {error}")
+        logging.getLogger("kraken").error("%s", error)
         return 1
+
+
+def start_log() -> None:
+    """Write kraken's diary to ~/.local/state/kraken/kraken.log, for when something goes wrong."""
+    log = logging.getLogger("kraken")
+    for old in list(log.handlers):  # running main() again (as the tests do) replaces the old log file
+        log.removeHandler(old)
+        old.close()
+    path = state_dir() / "kraken.log"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handler = logging.FileHandler(path)
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    log.addHandler(handler)
+    log.setLevel(logging.INFO)

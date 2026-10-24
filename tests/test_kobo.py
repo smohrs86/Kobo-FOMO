@@ -1,6 +1,7 @@
 """Tests for finding the Kobo and copying to it, using pretend drives instead of real hardware."""
 
 import shutil
+import subprocess
 from collections import namedtuple
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from kraken.kobo import (
     KoboError,
     copy_to_kobo,
     delete_from_kobo,
+    eject,
     find_kobo,
     remove_leftover_parts,
 )
@@ -232,3 +234,35 @@ def test_delete_refuses_anything_outside_fonts(fake_kobo, destination):
     with pytest.raises(KoboError, match="Refusing to"):
         delete_from_kobo(fake_kobo, Path(destination))
     assert book.exists()
+
+
+# --- Ejecting (step 8) ---
+
+
+class PretendUdisksctl:
+    """Stands in for subprocess.run, recording each udisksctl command. `fail_on` makes one action fail."""
+
+    def __init__(self, fail_on: str | None = None):
+        self.commands = []
+        self.fail_on = fail_on
+
+    def __call__(self, command, **kwargs):
+        self.commands.append(command[1])
+        failed = command[1] == self.fail_on
+        return subprocess.CompletedProcess(command, 1 if failed else 0, "", "target is busy" if failed else "")
+
+
+def test_eject_unmounts_then_powers_off(fake_kobo, monkeypatch):
+    udisksctl = PretendUdisksctl()
+    monkeypatch.setattr(subprocess, "run", udisksctl)
+    eject(fake_kobo)
+    assert udisksctl.commands == ["unmount", "power-off"]
+
+
+def test_failed_unmount_stops_before_power_off(fake_kobo, monkeypatch):
+    udisksctl = PretendUdisksctl(fail_on="unmount")
+    monkeypatch.setattr(subprocess, "run", udisksctl)
+
+    with pytest.raises(KoboError, match="target is busy"):
+        eject(fake_kobo)
+    assert udisksctl.commands == ["unmount"]
