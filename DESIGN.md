@@ -254,6 +254,16 @@ never have to edit system files by hand.
   for **variable** fonts (all weights in one file) is uncertain.
   Candidates: **Atkinson Hyperlegible** (already downloaded), **Literata** (designed for e-reading),
   **Lexend** (designed for reading ease), **Andika** (designed for clear letter shapes).
+- **Catalogue layout:** one folder per family, named as it appears in the checklist. Each file's style
+  comes from the end of its name (`-Regular`, `-Bold`, `-Italic`, `-BoldItalic`); other weights are ignored.
+  A family is left out, with the reason shown, if it has no Regular, no Bold, no licence file (a name
+  starting `OFL`, `LICENSE` or `LICENCE`), two files for one style, or a "font" that isn't one (checked
+  by the file's first four bytes, which catches a web page saved by mistake).
+  ```
+  ~/.local/share/kraken/fonts/
+  ├── Atkinson Hyperlegible/   AtkinsonHyperlegible-Regular.ttf, AtkinsonHyperlegible-Bold.ttf, OFL.txt
+  └── Literata/                Literata-Regular.ttf, -Bold, -Italic, -BoldItalic, OFL.txt
+  ```
 - **`kraken fonts`** shows a checklist of the families in the catalogue. Ticked = install on the Kobo.
 - **On the next push,** kraken copies ticked families into `fonts/` on the Kobo, renamed to the Kobo's
   pattern (`Family-Regular.ttf`, `-Bold`, `-Italic`, `-BoldItalic`). It removes unticked families **only if the
