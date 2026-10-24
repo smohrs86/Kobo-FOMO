@@ -1,7 +1,7 @@
 # Kobo-FOMO
 
 Turning my old Kobo Glo e-reader into a calm, distraction-free reader where everything I read is in
-**bold-start lettering**.
+**bo**ld-**st**art **let**tering.
 
 ## Why
 
