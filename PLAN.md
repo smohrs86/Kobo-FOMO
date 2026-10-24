@@ -19,8 +19,8 @@ with Atkinson's real italics and a warning (D36). Step 9, auto-sync, was built (
 passed**. Spike C samples are in `inbox/`, one for every R5 format. RTF left out (D35). 140 automatic tests pass.
 
 The Kobo's `fonts/` folder holds Atkinson Hyperlegible (all four styles, put there by kraken) and a
-hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand). **Auto-sync is
-currently off** (switched off as the last Checkpoint B test); `kraken autosync on` switches it back on.
+hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand). **Auto-sync is on**:
+plugging in and tapping Connect is all it takes. `kraken autosync off` stops it.
 
 **Next up, in order:**
 
