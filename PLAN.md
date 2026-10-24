@@ -142,6 +142,16 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D40 | If kraken is already running by hand, auto-sync **steps aside** for that plug-in and notes it in the log | That's what the lock is for (D34); two notifications would confuse |
 | D41 | A Kobo that's **already plugged in** when the watcher starts is pushed | It's almost always there because it was just plugged in |
 | D42 | **`kraken autosync`** on its own says whether auto-sync is on, off, or switched on but not running | Saves remembering `systemctl` commands |
+| D43 | Bold-start applies to **letters only**: numbers such as "1865" are left alone | A half-bold number reads oddly, and the eye doesn't scan numbers the way it scans words |
+| D44 | A hyphen **splits** words ("daisy-chain" is two words); an apostrophe **joins** them ("didn't" is one) | Each part of a hyphenated word is a word your eye lands on; an apostrophe sits inside a single word |
+| D45 | **Short words** get at least one bold letter (rounding up), as in Spike A | The owner approved this look on the Glo |
+| D46 | A book containing `META-INF/encryption.xml` (usually DRM) goes to **`skipped/`** with a note, and is never opened or changed | The legal rules (D2, `CLAUDE.md`). Simplest safe rule; revisit only if a DRM-free book needs it |
+| D47 | A book with **no `toc.ncx`** goes to `skipped/` with a note that it would freeze the Kobo. **Building** a `toc.ncx` (D12) waits until a real book needs one | The three test books have one, and Pandoc and Calibre add one to the EPUBs they make (Milestone 3). Changes when D12's "add one" is built, not the rule |
+| D48 | **`unbold_epub` is built in Milestone 2**, with `bold_epub` | Its round-trip test proves our marker can be removed exactly (D7); it's cheap to build alongside |
+| D49 | In Milestone 2, **non-EPUB files are left in `~/KRAKEN/`**, and the summary counts them as waiting for a later version | Moving them to `skipped/` would mean moving them back once Milestone 3 exists |
+| D50 | Files changed in the **last 10 seconds** wait for the next push; hidden files and unfinished downloads (`.part`, `.crdownload`) are ignored | With auto-sync, a push could start while a big book is still being copied in |
+| D51 | A book's name on the Kobo is `kraken/<original name>.epub`, with `\ : * ? " < > \|` replaced by `_` | The Kobo's FAT drive can't store those characters |
+| D52 | The bolded copy is built in a **temporary folder** and deleted after copying; `sent/` keeps only the original | The original is what `--rebuild` and `pull` work from; a second copy wastes space |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
