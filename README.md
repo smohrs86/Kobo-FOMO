@@ -71,6 +71,16 @@ codename for the Glo.)
 No Wi-Fi, no store, no account, no subscription fees, no bloat, no overreach, and no locks on my own
 library.
 
+**Running it from source** (on Ubuntu; it doesn't do anything useful yet):
+
+```bash
+sudo apt install python3-venv        # once: Ubuntu leaves Python's venv tool out
+python3 -m venv .venv
+.venv/bin/pip install -e ".[dev]"
+.venv/bin/kraken --help
+.venv/bin/pytest                     # run the tests
+```
+
 **What it won't do:** library loans (Libby and the like) are locked with DRM, so kraken leaves them alone.
 Scanned PDFs (pictures of pages rather than text) aren't supported either.
 
@@ -81,7 +91,8 @@ Work in progress.
 - ✅ Kobo set up: Sideloaded Mode, no Kobo account, Wi-Fi off
 - ✅ Bold-start tested on the Glo's screen (30% strength suits me best)
 - ✅ Custom sleep screen
-- ⏳ kraken: being designed, then built one feature at a time
+- ✅ kraken designed, and its project skeleton set up
+- ⏳ kraken: being built one feature at a time
 
 The full plan, decisions and project log are in [PLAN.md](PLAN.md). Once kraken works for me, I'd like
 to share it so other Kobo owners can use it too.

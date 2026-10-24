@@ -1,0 +1,30 @@
+# The project's "ID card": what it is called, what it needs, and which commands it installs.
+# Install it for development with:  .venv/bin/pip install -e ".[dev]"
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kraken"
+version = "0.1.0"
+description = "Converts books and documents to bold-start EPUBs and syncs them to a Kobo Glo over USB"
+readme = "README.md"
+license = "GPL-3.0-only"
+requires-python = ">=3.12"
+# Libraries are added here when the code first uses them (D27).
+dependencies = []
+
+[project.optional-dependencies]
+# Only needed to develop kraken, not to use it.
+dev = ["pytest"]
+
+[project.scripts]
+# Creates the `kraken` command, which runs main() in kraken/cli.py.
+kraken = "kraken.cli:main"
+
+[tool.setuptools]
+packages = ["boldstart", "kraken"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

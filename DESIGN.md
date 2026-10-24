@@ -314,13 +314,16 @@ pyproject.toml          the project's ID card: name, dependencies, and the `krak
 (`PLAN.md`'s first sketch called the Kobo part `kobo_sync/`. `kraken/` replaces it, after D16.)
 
 **Running from source (D23):** a **virtual environment** ("venv") is a private Python installation just for
-this project, so its libraries never clash with Ubuntu's own. Setup is three commands, done once:
+this project, so its libraries never clash with Ubuntu's own. Ubuntu leaves the venv tool out, so install it
+once with `sudo apt install python3-venv`. Then setup is three commands, done once:
 
 ```bash
-python3 -m venv .venv            # make the private Python
-.venv/bin/pip install -e .       # install kraken into it ("-e": edits to the code take effect immediately)
-.venv/bin/kraken --help          # the kraken command now exists
+python3 -m venv .venv                # make the private Python
+.venv/bin/pip install -e ".[dev]"    # install kraken and pytest ("-e": code edits take effect immediately)
+.venv/bin/kraken --help              # the kraken command now exists
 ```
+
+Run the tests with `.venv/bin/pytest`.
 
 **Dependencies** (libraries kraken needs that aren't built into Python): **lxml** (reading book pages),
 **pytest** (running tests), and maybe a small checklist library for `kraken fonts`. Everything else comes

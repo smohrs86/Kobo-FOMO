@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) next.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build) next.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-23
 
@@ -12,7 +12,8 @@ Updated at the end of every working session.*
 
 **Session ending 2026-10-23 (evening).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
 account, Wi-Fi off, and a custom sleep screen installed. (Late evening: a second factory reset, recovered the
-same night; see the project log.)
+same night; see the project log.) Then **Phase 4 done**: the Python project skeleton runs and its first
+test passes (D27–D30).
 
 This session: a scenario walkthrough found gaps (section 8, Q7–Q12); decisions D19–D26 were made;
 `DESIGN.md` was written and **approved** (Phase 3 done); the README was polished, with bold-start examples.
@@ -20,11 +21,9 @@ The owner's own tool comes first, and the public snap release later (D23). **No 
 
 **Next up, in order:**
 
-1. **Phase 4, Setup:** the Python project skeleton from `DESIGN.md` section 10: `pyproject.toml`, the
-   `boldstart/` and `kraken/` folders, a venv, pytest, and one passing test. (`DESIGN.md` approved: D24–D26.)
-2. **Phase 5, Build:** Milestone 1 of `DESIGN.md` section 12, the walking skeleton (D17): font sync + auto-sync.
+1. **Phase 5, Build:** Milestone 1 of `DESIGN.md` section 12, the walking skeleton (D17): font sync + auto-sync.
    Then bold-start, documents, pull, rebuild. Release questions (Q11, Q12, snap) wait (D23).
-3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
+2. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
 
 **Waiting on the owner:** add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
@@ -112,6 +111,10 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D24 | **`DESIGN.md` approved as drafted:** the `~/KRAKEN/` inbox with `sent/`, `skipped/`, `as-is/` and `pulled/`; books in `kraken/` on the Kobo as plain `.epub`; copy as `.part` then rename; auto-sync via a polling systemd user service; bold-start marker `<b class="kraken-bs">` | Reviewed by the owner, who accepted every recommendation |
 | D25 | The `kraken fonts` picker is a **checklist in the terminal**, not a window | Simple, and matches the rest of kraken, which is all terminal commands |
 | D26 | After auto-sync, kraken **ejects the Kobo automatically** (`eject_after_push = true`) | You just unplug when the notification appears. It can be turned off in settings |
+| D27 | Libraries are added to `pyproject.toml` **when the code first uses them**. pytest is a `dev` extra; lxml waits for Milestone 2 | YAGNI: no dependency until there is code that needs it (R9) |
+| D28 | The command line uses **argparse**, from Python's standard library | Nothing extra to install. Click is nicer but would be one more dependency |
+| D29 | kraken needs **Python 3.12 or newer** | 3.12 is the oldest Python still supported on current Ubuntu releases, and it includes `tomllib` for reading `settings.toml` |
+| D30 | Subcommands appear **in the milestone that builds them**, not as stubs | `kraken --help` never advertises something that doesn't work yet |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -331,3 +334,7 @@ A short diary of what actually happened, so future-us knows *why* things are the
   and `backups/2026-10-23-after-fw-4.38-second/`. **Recovery recipe:** reset → copy firmware → eject → wait →
   Sideloaded Mode → restart → sleep screen + two Energy saving settings → **open a book** (the sleep
   graphic only shows when a book is in progress; see Spike D). Sleep screen confirmed working.
+- **2026-10-23 (late):** **Phase 4 done.** Ubuntu leaves out Python's venv tool, so the owner installed
+  `python3-venv`. Added `pyproject.toml` (license GPL-3.0-only, matching the README), the `boldstart/` and
+  `kraken/` packages, and `kraken/cli.py` with `--help` and `--version`. The venv installs it, the `kraken`
+  command runs, and the first test passes. Decisions D27–D30.
