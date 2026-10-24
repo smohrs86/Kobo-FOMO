@@ -39,9 +39,10 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
 | R8 | **Push:** new and changed files go from a folder on my computer to the reader over USB. Sync never deletes anything from the reader; I delete books on the reader myself | Must |
 | R9 | No bloat: only the features listed here | Must |
 | R10 | **Pull:** copy a document from the reader back to my computer, without the bold-start formatting | Should |
-| R11 | **More fonts:** traditional press (serif) fonts and more sans-serif fonts, each with a real **Bold** (bold-start depends on it). Open-licensed only | Should |
+| R11 | **More fonts:** traditional press (serif) and sans-serif fonts, each with a real **Bold** (bold-start depends on it). Open-licensed only. Picked from a list with `kraken fonts`; installed or removed on the next sync | Should |
 | R12 | **Custom sleep screen:** our own graphic when the Kobo is asleep or powered off ✅ (sleep) | Should |
 | R13 | **Custom power-on screen:** our own graphic in the boot animation | Could |
+| R14 | **Auto-sync on plug-in:** when the Kobo is connected (after tapping *Connect*), `kraken push` runs by itself, ejects the Kobo safely, and shows a desktop notification | Should |
 
 ### Out of scope (deliberately not doing)
 
@@ -73,9 +74,11 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D11 | GitHub repo is **public** (GPL-3.0), not private | It's a portfolio piece showing how AI can support accessibility. Nothing personal is ever committed (see `CLAUDE.md`, Privacy) |
 | D12 | Every EPUB the pipeline outputs **must include an EPUB 2 `toc.ncx`** (adding one if the source book lacks it), and is checked automatically before it's copied | Spike A proved a missing `toc.ncx` freezes Kobo's Adobe-based reader when settings change |
 | D13 | Use **Kobo's built-in reader** (in Sideloaded Mode); KOReader is parked (P2) | After Sideloaded Mode (R1 ✅) and Spike A, the built-in reader does everything needed so far. "YAGNI": don't add complexity until it's needed |
-| D14 | *Pending Spike C:* choose the converter. Option 1: **Pandoc** for documents plus a PDF tool. Option 2: **Calibre** for everything | Decided by comparing real output on the Kobo, not by guessing |
+| D14 | *Pending Spike C:* choose the converter. Option 1: **Pandoc** for documents plus a PDF tool. Option 2: **Calibre** for everything. (Both installed 2026-10-23) | Decided by comparing real output on the Kobo, not by guessing |
 | D15 | Change only the boot **animation** frames (`/etc/images/kraken-on-*.raw.gz`), never the bootloader's first logo | Replacing animation images can't stop the Kobo from starting, and is easy to undo. The bootloader logo lives in a raw area where a mistake could brick the device |
 | D16 | The command-line tool is called **`kraken`** (`kraken push`, `kraken pull`) | *Kraken* is Kobo's real internal codename for the Glo (the firmware's boot images are `kraken-on-*.raw.gz`). Short, memorable, and true |
+| D17 | **Build order: "walking skeleton" first.** kraken's first feature is font sync (R11), which proves the core plumbing (find Kobo → copy → verify → eject → notify) before book conversion is added | Fonts need all the plumbing but none of the hard conversion work, so the riskiest *infrastructure* gets tested early on something simple |
+| D18 | kraken **only removes files it installed itself** (tracked in a manifest), and never removes books (R8) | Un-picking a font should remove it, but kraken must never touch anything it didn't put there |
 
 ## 5. Architecture
 
@@ -117,7 +120,7 @@ Each phase has a **definition of done**, the test of whether we can move on.
 | 2. Feasibility spikes | A ✅ bold-start on the Glo's screen; C: compare converters on real sample files for each format (B, KOReader, parked by D13) | Each risky unknown is answered "yes", "no" or "yes, but…" |
 | 3. Design | Folder layout, config file format, how the pipeline steps connect | Written design you understand and approve |
 | 4. Setup | git repo, public GitHub repo `Kobo-FOMO` (started early), Python project, tests | Empty but working project skeleton on GitHub |
-| 5. Build | One feature at a time, in order: push → bold-start → Docs/PDF → pull → themes | Each feature tested on the Kobo before starting the next |
+| 5. Build | One feature at a time (D17): font sync + auto-sync skeleton → bold-start → document conversion → pull → boot screen | Each feature tested on the Kobo before starting the next |
 | 6. Lock-down | Remove or block Kobo services, boot into KOReader | R1 verified: no Kobo traffic |
 
 ## 7. Risks
