@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–4 built; step 5 (`kraken/inbox.py`) next.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–5 built; step 6 (books in `push.py`) next.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-24
 
@@ -16,7 +16,7 @@ account, Wi-Fi off, custom sleep screen. *Alice* is on the Kobo, so the sleep sc
 This session: **Milestone 1 is finished** (Checkpoints A and B passed; D35–D42). **Milestone 2 was planned
 (D43–D52, steps in `DESIGN.md` section 12) and steps 1–3 are built:** the whole bold-start engine,
 `boldstart/text.py`, `page.py` and `epub.py`, with `bold_epub` and `unbold_epub`. Every page of three real
-books bolds once per word and round-trips. Step 4 (`kraken/checks.py`) is built too; 227 automatic tests pass.
+books bolds once per word and round-trips. Steps 4 (`kraken/checks.py`) and 5 (`kraken/inbox.py`) are built too; 249 automatic tests pass.
 New working rule: a **💾 savepoint** (docs, commit, push) after every finished step, so a `/compact` or
 restart never loses decisions (see `CLAUDE.md`, "How we work").
 
@@ -27,10 +27,11 @@ auto-sync will send any `.epub` waiting in `~/KRAKEN/` on the next plug-in.
 
 **Next up, in order:**
 
-1. **Milestone 2, steps 4–6** (`DESIGN.md` section 12, "Milestone 2 steps"):
+1. **Milestone 2, step 6** (`DESIGN.md` section 12, "Milestone 2 steps"):
    - 4 ✅: `kraken/checks.py`: `check_book` (before bolding) and `check_bolded` (on the copy) raise `CheckError`
      with a plain-words reason for the `skipped/` note.
-   - 5: `kraken/inbox.py`: waiting files (D49, D50), names on the Kobo (D51), `sent/`, `skipped/` with a note.
+   - 5 ✅: `kraken/inbox.py`: `scan_inbox` sorts waiting files into books, later (D49), too new (D50) and
+     clashes; `kobo_name` (D51); `file_sent` and `file_skipped` (note: D53).
    - 6: wire into `push.py`: books before fonts, one bad book never stops the others, summary, `--dry-run`
      lists books, bolded copy in a temporary folder (D52).
    - Then **Checkpoint C** on the real Kobo (the checklist is in `DESIGN.md`).
@@ -160,6 +161,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D50 | Files changed in the **last 10 seconds** wait for the next push; hidden files and unfinished downloads (`.part`, `.crdownload`) are ignored | With auto-sync, a push could start while a big book is still being copied in |
 | D51 | A book's name on the Kobo is `kraken/<original name>.epub`, with `\ : * ? " < > \|` replaced by `_` | The Kobo's FAT drive can't store those characters |
 | D52 | The bolded copy is built in a **temporary folder** and deleted after copying; `sent/` keeps only the original | The original is what `--rebuild` and `pull` work from; a second copy wastes space |
+| D53 | The note beside a file in `skipped/` is named `<file name>.why.txt`, and says what happened, when, and how to try again. Book names that differ **only in capitals** (`Alice.epub`, `alice.epub`) clash, like D51's replaced characters; `sent/` keeps one original per name on the Kobo | Chosen while building step 5 (the design didn't name the note). The Kobo's FAT drive treats upper and lower case as the same name, so two such books would overwrite each other |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -432,3 +434,10 @@ A short diary of what actually happened, so future-us knows *why* things are the
   `check_bolded` is the light check on our own copy: not damaged, `mimetype` first and uncompressed. The three
   real books pass both. Breaking key lines on purpose found one weak test (the "mimetype first" test was
   really caught by the "uncompressed" rule), now fixed. 227 tests pass.
+- **2026-10-24:** **Step 5 built** (`kraken/inbox.py`). `scan_inbox` only looks, never moves: books (`.epub`, any
+  case), files for a later version (D49), files changed in the last 10 seconds (D50; a date in the future
+  doesn't wait forever), and clashes (two books with the same name on the Kobo: the first by name order is
+  sent, the other waits). Hidden files, `.part`/`.crdownload` and sub-folders are ignored. While building it, we
+  noticed that the Kobo's FAT drive ignores capitals, so `Alice.epub` and `alice.epub` clash too (D53).
+  `file_sent` replaces the older original in `sent/`; `file_skipped` writes a `.why.txt` note (D53). Breaking
+  key lines on purpose found one check that made no difference, now removed. 249 tests pass.
