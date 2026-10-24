@@ -1,33 +1,45 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build) next.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 steps 1–8 built; Checkpoint A next.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
-> **Last updated:** 2026-10-23
+> **Last updated:** 2026-10-24
 
 ## 0. Where we left off
 
 *A handoff note, so any session (human or AI) can pick up where the last one stopped.
 Updated at the end of every working session.*
 
-**Session ending 2026-10-23 (evening).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
-account, Wi-Fi off, and a custom sleep screen installed. (Late evening: a second factory reset, recovered the
-same night; see the project log.) Then **Phase 4 done**: the Python project skeleton runs and its first
-test passes (D27–D30).
+**Session ending 2026-10-24 (just after midnight).** The device is working: firmware 4.38.23429, Sideloaded
+Mode, no Kobo account, Wi-Fi off, custom sleep screen. (A second factory reset on 2026-10-23 was recovered the
+same night; the recovery recipe is in the project log.) *Alice* is on the Kobo, so the sleep screen shows.
 
-This session: a scenario walkthrough found gaps (section 8, Q7–Q12); decisions D19–D26 were made;
-`DESIGN.md` was written and **approved** (Phase 3 done); the README was polished, with bold-start examples.
-The owner's own tool comes first, and the public snap release later (D23). **No code has been written yet.**
+This session: the Kobo was recovered, **Phase 4 (Setup) was finished**, and **Milestone 1 steps 1–8 were
+built**: settings, finding the Kobo, safe copy, the font catalogue, the sync plan, applying it with a
+write-ahead manifest, `kraken fonts` and `kraken push` (with lock, log, eject, notify and `--dry-run`).
+116 automatic tests pass. Decisions D27–D34. **Nothing has been run against the real Kobo yet.**
 
 **Next up, in order:**
 
-1. **Phase 5, Build:** Milestone 1 of `DESIGN.md` section 12, the walking skeleton (D17): font sync + auto-sync.
-   Its step list (steps 1–9, checkpoints A and B) is approved (D31–D34). Step 1 is settings.
-   Then bold-start, documents, pull, rebuild. Release questions (Q11, Q12, snap) wait (D23).
-2. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
+1. **Checkpoint A, on the real Kobo** (`DESIGN.md` section 12, Milestone 1 steps):
+   - Set up the starter catalogue in `~/.local/share/kraken/fonts/` (D33): one folder per family.
+     Atkinson Hyperlegible is in `downloads/fonts/` with its licence. **Literata** still needs downloading
+     from its official source, with the checksum and licence checked. Option: run the checkpoint with Atkinson
+     only, and add Literata afterwards.
+   - `kraken fonts` (tick) → `kraken push --dry-run` → `kraken push` → the font is in the Kobo's menu, and
+     bold-start text uses its real Bold. Then untick → push → it's gone. A hand-added font in `fonts/` survives.
+   - Check: the Kobo doesn't list `.kraken/` as books; whether it needs a restart to see new fonts; that the
+     eject works from kraken (`--no-user-interaction`); and the copy check reads back from the device.
+2. **Step 9, auto-sync** (`kraken autosync on`/`off`, the watcher, the systemd unit), then **Checkpoint B**.
+   That finishes Milestone 1. Then Milestone 2 (bold-start EPUBs). Release questions (Q11, Q12, snap) wait (D23).
+3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
 
-**Waiting on the owner:** add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
+**Waiting on the owner:** time with the Kobo for Checkpoint A; add sample documents to `inbox/` (a real PDF
+newsletter and an AI-written `.docx` are ideal). Unanswered: what the screen showed when the Kobo wouldn't
+power down before the second reset.
+
+**How to run it:** `.venv/bin/kraken --help`; tests with `.venv/bin/pytest`.
 
 ## 1. Vision
 
@@ -343,3 +355,10 @@ A short diary of what actually happened, so future-us knows *why* things are the
   `python3-venv`. Added `pyproject.toml` (license GPL-3.0-only, matching the README), the `boldstart/` and
   `kraken/` packages, and `kraken/cli.py` with `--help` and `--version`. The venv installs it, the `kraken`
   command runs, and the first test passes. Decisions D27–D30.
+- **2026-10-23/24 (night):** **Milestone 1, steps 1–8 built**, each with its own tests and commit (116 tests).
+  Design refinements found while building: copies are verified by reading back from the device, not the page
+  cache, *before* the rename; unfinished copies end `.kraken.part`; FAT ignores case, so name checks do too;
+  the manifest is saved before copying with new files marked pending (a write-ahead log), so a pulled cable
+  can't make kraken's fonts look hand-added; deleting is refused outside `fonts/`; a read-only mount stops
+  early. Safety tests were checked by breaking the code on purpose (mutation testing). New modules `push.py`
+  and `lock.py`. Not yet run against the real Kobo: that's Checkpoint A.

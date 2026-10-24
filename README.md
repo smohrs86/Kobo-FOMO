@@ -92,7 +92,7 @@ Work in progress.
 - ✅ Bold-start tested on the Glo's screen (30% strength suits me best)
 - ✅ Custom sleep screen
 - ✅ kraken designed, and its project skeleton set up
-- ⏳ kraken: being built one feature at a time
+- ⏳ kraken: font sync and `kraken push` built and tested on the computer; next, testing on the Kobo
 
 The full plan, decisions and project log are in [PLAN.md](PLAN.md). Once kraken works for me, I'd like
 to share it so other Kobo owners can use it too.
