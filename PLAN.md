@@ -10,24 +10,30 @@
 *A handoff note, so any session (human or AI) can pick up where the last one stopped.
 Updated at the end of every working session.*
 
-**Session 2026-10-24 (daytime).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
+**Session 2026-10-24 (daytime, ended for a context refresh).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
 account, Wi-Fi off, custom sleep screen. *Alice* is on the Kobo, so the sleep screen shows.
 
-This session: **Milestone 1 is finished.** Checkpoint A passed (fonts install, verify, remove, and leave
-hand-added fonts alone). It found that the Kobo shows italic text in Bold when a family has no Italic: fixed
-with Atkinson's real italics and a warning (D36). Step 9, auto-sync, was built (D37–D42), and **Checkpoint B
-passed**. Spike C samples are in `inbox/`, one for every R5 format. RTF left out (D35). 140 automatic tests pass.
+This session: **Milestone 1 is finished** (Checkpoints A and B passed; D35–D42). **Milestone 2 was planned
+(D43–D52, steps in `DESIGN.md` section 12) and steps 1–3 are built:** the whole bold-start engine,
+`boldstart/text.py`, `page.py` and `epub.py`, with `bold_epub` and `unbold_epub`. Every page of three real
+books bolds once per word and round-trips. 210 automatic tests pass.
 
 The Kobo's `fonts/` folder holds Atkinson Hyperlegible (all four styles, put there by kraken) and a
 hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand). **Auto-sync is on**:
-plugging in and tapping Connect is all it takes. `kraken autosync off` stops it.
+plugging in and tapping Connect is all it takes. `kraken autosync off` stops it. Note: once step 6 is built,
+auto-sync will send any `.epub` waiting in `~/KRAKEN/` on the next plug-in.
 
 **Next up, in order:**
 
-1. **Milestone 2, bold-start EPUBs** (`DESIGN.md` section 12): plan its steps first, for the owner to approve.
-   Its device test should also check that bold-start uses the font's real Bold and stays distinct from
-   italics. The two DRM-free EPUBs in `inbox/` can be its test books. Release questions (Q11, Q12, snap)
-   wait (D23).
+1. **Milestone 2, steps 4–6** (`DESIGN.md` section 12, "Milestone 2 steps"):
+   - 4: `kraken/checks.py`: valid zip, readable OPF, `toc.ncx` present (D47), not locked (D46). Run on the
+     source before bolding (reasons for `skipped/`), and a light check on the bolded copy.
+   - 5: `kraken/inbox.py`: waiting files (D49, D50), names on the Kobo (D51), `sent/`, `skipped/` with a note.
+   - 6: wire into `push.py`: books before fonts, one bad book never stops the others, summary, `--dry-run`
+     lists books, bolded copy in a temporary folder (D52).
+   - Then **Checkpoint C** on the real Kobo (the checklist is in `DESIGN.md`).
+   - Optional, before C: the owner previews bolded books in Calibre's viewer (`ebook-viewer <file>`). Preview
+     files were made in a scratch folder that won't survive; make new ones with `bold_epub`.
 2. **Spike C (converters):** write a short test plan for the owner to approve, then run it. Calibre and Pandoc
    are installed; samples are described in the 2026-10-24 log entries. Needed before Milestone 3.
 3. **Literata** (D33): download from its official source with the checksum and licence checked. It needs all
@@ -410,3 +416,11 @@ A short diary of what actually happened, so future-us knows *why* things are the
   auto-sync off, plugging in did nothing. One fix: the service's journal stayed empty because Python holds
   back printed lines when there's no terminal, so the unit file now sets `PYTHONUNBUFFERED=1`. **Milestone 1
   is finished.**
+- **2026-10-24:** **Milestone 2 planned** (D43–D52, every recommendation approved). **Steps 1–3 built**, each
+  checked by breaking key lines on purpose. Step 1 (`text.py`): the mutation check found an unreachable branch,
+  removed. Step 2 (`page.py`): the tests caught a real bug the real-book round trip had missed: the text after
+  each new marker was bolded a second time (so 30% looked heavier). Fixed, with a test that no two markers sit
+  side by side; bolding also got twice as fast. Books are parsed with entity expansion and network access off.
+  Step 3 (`epub.py`): pages found through the OPF; `mimetype` first and uncompressed; locked books refused
+  before anything is written; a failed book leaves no half-written file. *Alice* and the two inbox EPUBs bold
+  in about a second each and round-trip (lxml only re-quotes the DOCTYPE line). lxml 6.1 added (D27).

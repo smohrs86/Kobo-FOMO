@@ -432,9 +432,9 @@ Each step has its own automatic tests and its own commit. 🔌 marks a device ch
 
 | # | Step | File | What it does |
 |---|---|---|---|
-| 1 | Words | `boldstart/text.py` | Words (letters only, D43; hyphens split, apostrophes join, D44), how many letters to bold (D45), web and email addresses. Adds lxml (D27) |
-| 2 | One page | `boldstart/page.py` | Bold one XHTML page with the skip rules (section 5); removing our marker gives no double-bolding and unbold |
-| 3 | Whole book | `boldstart/epub.py` | `bold_epub`, `unbold_epub` (D48); other files copied unchanged; round-trip test. Preview in Calibre's viewer |
+| 1 ✅ | Words | `boldstart/text.py` | Words (letters only, D43; hyphens split, apostrophes join, D44), how many letters to bold (D45), web and email addresses. Adds lxml (D27) |
+| 2 ✅ | One page | `boldstart/page.py` | Bold one XHTML page with the skip rules (section 5); removing our marker gives no double-bolding and unbold |
+| 3 ✅ | Whole book | `boldstart/epub.py` | `bold_epub`, `unbold_epub` (D48); other files copied unchanged; round-trip test. Preview in Calibre's viewer |
 | 4 | Checks | `kraken/checks.py` | Valid zip, readable OPF, `toc.ncx` present (D47), not locked (D46) |
 | 5 | Inbox | `kraken/inbox.py` | Waiting files (D49, D50), names on the Kobo (D51), `sent/`, `skipped/` with a note |
 | 6 | Push | `push.py` | Books before fonts; one bad book never stops the others; summary and `--dry-run` list books; bolded copy in a temporary folder (D52) |
