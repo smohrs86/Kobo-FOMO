@@ -18,14 +18,14 @@ account, Wi-Fi off, and a custom sleep screen installed.
 1. **Phase 3, Design:** write `DESIGN.md` for the `kraken` tool (commands, folders, settings file,
    code layout `boldstart/` + `kraken/`, auto-sync on plug-in, tests). Review and approve it before any code.
    - Open question: the `kraken fonts` picker as a **terminal checklist** (recommended) or a window?
-   - Must answer the walkthrough questions Q8–Q12 (section 8) and fit the snap release (R15, D20).
+   - Must cover the walkthrough items Q8–Q10 (section 8). Release questions (Q11, Q12, snap) wait (D23).
 2. **Phase 5, Build:** walking skeleton first (D17): font sync + auto-sync, then bold-start,
    then document conversion, then pull, then the boot screen (R13).
 3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
 
 **Waiting on the owner:** confirm the updated sleep screen displays correctly; answer the picker
-question, Q11 (fonts online or bundled) and Q12 (which Kobos); add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
+question; add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
 
 ## 1. Vision
 
@@ -106,6 +106,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D19 | Files to read are **moved by hand into a `KRAKEN` folder** in the home folder, outside the code repo. kraken never looks in Downloads | Only what you choose gets sent. Keeps personal books out of the public repo and out of the released snap |
 | D20 | **End state:** once kraken works, it is released once as a snap file on GitHub Releases (R15), then the repo is **archived** (made read-only) and development stops. The owner keeps running kraken locally | The goal is a finished tool, not an ongoing service. Archiving tells visitors the project is complete |
 | D22 | `KRAKEN/` is an **inbox**: after a file is copied to the Kobo *and verified*, it moves to `KRAKEN/sent/`. Push only looks at files waiting in `KRAKEN/` | A book deleted on the Kobo can't come back, because its source is no longer waiting. To update a document, drop the new version in again. This replaces the push record proposed in Q8 |
+| D23 | **Owner first, public later.** Build kraken for the owner's own Glo and computer, run from source. Snap packaging and public-release questions (R15, D20, Q11, Q12) wait until it works | Get a working tool into the owner's hands before solving other people's setups. Keeps each step small |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -161,7 +162,7 @@ Each phase has a **definition of done**, the test of whether we can move on.
 | Bad USB cable or port | Medium (happened 2026-10-23) | Use the known-good cable and port; suspect the cable first when USB misbehaves |
 | Bold-start text looks bad on e-ink or a slow processor | Medium | Phase 2 spike tests it on the real screen before we build anything |
 | PDF → EPUB conversion is messy | Medium | The PDF ladder (D21): convert if clean, otherwise send as-is, skip scanned or locked PDFs |
-| Snap restrictions block USB access, auto-sync or notifications | Medium | Package the walking skeleton (D17) as a snap early, so problems show up on something simple |
+| Snap restrictions block USB access, auto-sync or notifications | Medium | Deferred by D23. When release work starts, package the simplest feature first, so problems show up on something small |
 | Personal files leak into the released snap | Medium | Build the snap from a fresh `git clone`, never the working folder (which holds git-ignored personal files), and list the snap's contents before release |
 | Bold-start isn't scientifically proven to help | Low | What matters is whether it helps *you*, so we test it with you |
 
