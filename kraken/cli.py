@@ -8,6 +8,7 @@ import logging
 from collections.abc import Callable
 
 from kraken import __version__
+from kraken.autosync import AutosyncError, status, turn_off, turn_on, unit_path, watch
 from kraken.fonts import PicksError, catalogue_dir, read_catalogue, read_picks, write_picks
 from kraken.lock import BusyError
 from kraken.push import run_push
@@ -84,6 +85,33 @@ def run_fonts(args: argparse.Namespace) -> int:
     return 0
 
 
+# --- kraken autosync (DESIGN.md section 6) ---
+
+STATUS_MESSAGES = {
+    "on": "Auto-sync is on: plug in the Kobo and tap Connect, and kraken pushes by itself.",
+    "off": "Auto-sync is off. `kraken autosync on` switches it on.",
+    "not running": ("Auto-sync is switched on, but it isn't running. "
+                    "`journalctl --user -u kraken-autosync` shows why; `kraken autosync on` restarts it."),
+}
+
+
+def run_autosync(args: argparse.Namespace) -> int:
+    if args.action == "watch":  # what the background service runs
+        watch()
+        return 0  # never reached: watch() runs until the service is stopped
+    if args.action == "on":
+        turn_on()
+        print(f"Auto-sync is on. Its unit file is {unit_path()}")
+        print("Plug in the Kobo and tap Connect: kraken pushes, ejects it and tells you when to unplug.")
+        return 0
+    if args.action == "off":
+        print("Auto-sync is off." if turn_off() else "Auto-sync was already off.")
+        return 0
+    state = status()
+    print(STATUS_MESSAGES[state])
+    return 0 if state != "not running" else 1
+
+
 # --- The command line itself ---
 
 
@@ -103,6 +131,11 @@ def build_parser() -> argparse.ArgumentParser:
     push.add_argument("--dry-run", action="store_true", help="show what push would do, without doing it")
     push.set_defaults(run=lambda args: run_push(dry_run=args.dry_run))
 
+    autosync = commands.add_parser("autosync", help="push by itself whenever the Kobo is plugged in")
+    autosync.add_argument("action", nargs="?", choices=["on", "off", "watch"],
+                          help="on or off; leave it out to see which it is (watch is what the background service runs)")
+    autosync.set_defaults(run=run_autosync)
+
     return parser
 
 
@@ -116,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
     start_log()
     try:
         return args.run(args)
-    except (BusyError, PicksError, SettingsError) as error:
+    except (AutosyncError, BusyError, PicksError, SettingsError) as error:
         print(f"kraken: {error}")
         logging.getLogger("kraken").error("%s", error)
         return 1
