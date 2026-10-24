@@ -6,6 +6,7 @@ Each file's style comes from the end of its name: Literata-Bold.ttf is the Bold.
 """
 
 import json
+import os
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -58,6 +59,38 @@ class Catalogue:
 def catalogue_dir() -> Path:
     """~/.local/share/kraken/fonts"""
     return data_dir() / "fonts"
+
+
+def picks_path() -> Path:
+    """Where the families ticked in `kraken fonts` are saved: ~/.local/share/kraken/font-picks.json"""
+    return data_dir() / "font-picks.json"
+
+
+class PicksError(Exception):
+    """The saved font picks can't be read. The message says what to do."""
+
+
+def read_picks(path: Path | None = None) -> set[str]:
+    """The families ticked in `kraken fonts`. None are ticked until you first save the checklist."""
+    path = path or picks_path()
+    if not path.exists():
+        return set()
+    try:
+        picks = json.loads(path.read_text())["picks"]
+        if not all(isinstance(name, str) for name in picks):
+            raise ValueError("every pick must be a family name")
+        return set(picks)
+    except (ValueError, KeyError, TypeError) as error:
+        raise PicksError(f"{path} is damaged ({error}). Delete it and pick your fonts again.") from None
+
+
+def write_picks(picks: set[str], path: Path | None = None) -> None:
+    """Save the ticked families. Written to a draft first, then renamed, so it's never half-saved."""
+    path = path or picks_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    draft = path.with_name(path.name + ".draft")
+    draft.write_text(json.dumps({"picks": sorted(picks)}, indent=2) + "\n")
+    os.replace(draft, path)
 
 
 def read_catalogue(folder: Path | None = None) -> Catalogue:

@@ -1,4 +1,4 @@
-"""Tests for kraken's folders and settings."""
+"""Tests for kraken's folders and settings. Each runs in the pretend home folder from conftest.py."""
 
 from pathlib import Path
 
@@ -11,15 +11,6 @@ from kraken.settings import (
     load_settings,
     state_dir,
 )
-
-
-@pytest.fixture(autouse=True)
-def pretend_home(tmp_path, monkeypatch):
-    """Run every test in a temporary home folder, so the real ~/.config is never touched."""
-    monkeypatch.setenv("HOME", str(tmp_path))
-    for variable in ("XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_STATE_HOME"):
-        monkeypatch.delenv(variable, raising=False)
-    return tmp_path
 
 
 def write_settings(home: Path, text: str) -> None:

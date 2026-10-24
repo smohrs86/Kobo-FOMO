@@ -34,6 +34,7 @@ At the end (section 12) there are **three small questions** for you, each with a
 ~/.config/kraken/settings.toml    your settings (section 4)
 ~/.local/state/kraken/kraken.log  a diary of what kraken did, for when something goes wrong
 ~/.local/share/kraken/fonts/      the font catalogue that `kraken fonts` picks from (section 7)
+~/.local/share/kraken/font-picks.json   the families you ticked in `kraken fonts`
 ```
 
 Why these places? Linux has a convention (the **XDG Base Directory** standard) saying settings go in
