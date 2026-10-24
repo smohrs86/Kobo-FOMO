@@ -26,8 +26,8 @@ auto-sync will send any `.epub` waiting in `~/KRAKEN/` on the next plug-in.
 **Next up, in order:**
 
 1. **Milestone 2, steps 4–6** (`DESIGN.md` section 12, "Milestone 2 steps"):
-   - 4: `kraken/checks.py`: valid zip, readable OPF, `toc.ncx` present (D47), not locked (D46). Run on the
-     source before bolding (reasons for `skipped/`), and a light check on the bolded copy.
+   - 4 ✅: `kraken/checks.py`: `check_book` (before bolding) and `check_bolded` (on the copy) raise `CheckError`
+     with a plain-words reason for the `skipped/` note.
    - 5: `kraken/inbox.py`: waiting files (D49, D50), names on the Kobo (D51), `sent/`, `skipped/` with a note.
    - 6: wire into `push.py`: books before fonts, one bad book never stops the others, summary, `--dry-run`
      lists books, bolded copy in a temporary folder (D52).
@@ -424,3 +424,9 @@ A short diary of what actually happened, so future-us knows *why* things are the
   Step 3 (`epub.py`): pages found through the OPF; `mimetype` first and uncompressed; locked books refused
   before anything is written; a failed book leaves no half-written file. *Alice* and the two inbox EPUBs bold
   in about a second each and round-trip (lxml only re-quotes the DOCTYPE line). lxml 6.1 added (D27).
+- **2026-10-24:** **Step 4 built** (`kraken/checks.py`). `check_book` refuses, with a reason for `skipped/`: not a
+  zip, locked (checked before anything else is read, D46), damaged (every file compared with its CRC
+  fingerprint), no readable OPF, or no `toc.ncx` in the zip (found by its type, not its name; D47).
+  `check_bolded` is the light check on our own copy: not damaged, `mimetype` first and uncompressed. The three
+  real books pass both. Breaking key lines on purpose found one weak test (the "mimetype first" test was
+  really caught by the "uncompressed" rule), now fixed. 227 tests pass.

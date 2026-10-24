@@ -40,12 +40,17 @@ def unbold_epub(source: Path, destination: Path) -> int:
 
 def page_names(book: zipfile.ZipFile) -> list[str]:
     """The names, inside the zip, of every page the book's OPF file lists."""
+    return manifest_names(book, PAGE_TYPE)
+
+
+def manifest_names(book: zipfile.ZipFile, media_type: str) -> list[str]:
+    """The names, inside the zip, of every file of one type that the book's OPF file lists."""
     opf_name = _opf_name(book)
     opf = _parse(book, opf_name)
-    folder = posixpath.dirname(opf_name)  # page addresses in the OPF are relative to its own folder
+    folder = posixpath.dirname(opf_name)  # addresses in the OPF are relative to its own folder
     names = []
     for item in opf.iterfind("opf:manifest/opf:item", NAMESPACES):
-        if item.get("media-type") == PAGE_TYPE and item.get("href"):
+        if item.get("media-type") == media_type and item.get("href"):
             names.append(posixpath.normpath(posixpath.join(folder, unquote(item.get("href")))))
     return names
 
