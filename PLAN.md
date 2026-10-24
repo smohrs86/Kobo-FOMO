@@ -18,14 +18,14 @@ account, Wi-Fi off, and a custom sleep screen installed.
 1. **Phase 3, Design:** write `DESIGN.md` for the `kraken` tool (commands, folders, settings file,
    code layout `boldstart/` + `kraken/`, auto-sync on plug-in, tests). Review and approve it before any code.
    - Open question: the `kraken fonts` picker as a **terminal checklist** (recommended) or a window?
-   - Must answer the walkthrough questions Q7–Q11 (section 8) and fit the snap release (R15, D20).
+   - Must answer the walkthrough questions Q8–Q12 (section 8) and fit the snap release (R15, D20).
 2. **Phase 5, Build:** walking skeleton first (D17): font sync + auto-sync, then bold-start,
    then document conversion, then pull, then the boot screen (R13).
 3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
 
 **Waiting on the owner:** confirm the updated sleep screen displays correctly; answer the picker
-question and Q7; add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
+question, Q11 (fonts online or bundled) and Q12 (which Kobos); add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
 
 ## 1. Vision
 
@@ -105,6 +105,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D18 | kraken **only removes files it installed itself** (tracked in a manifest), and never removes books (R8) | Un-picking a font should remove it, but kraken must never touch anything it didn't put there |
 | D19 | Files to read are **moved by hand into a `KRAKEN` folder** in the home folder, outside the code repo. kraken never looks in Downloads | Only what you choose gets sent. Keeps personal books out of the public repo and out of the released snap |
 | D20 | **End state:** once kraken works, it is released once as a snap file on GitHub Releases (R15), then the repo is **archived** (made read-only) and development stops. The owner keeps running kraken locally | The goal is a finished tool, not an ongoing service. Archiving tells visitors the project is complete |
+| D22 | `KRAKEN/` is an **inbox**: after a file is copied to the Kobo *and verified*, it moves to `KRAKEN/sent/`. Push only looks at files waiting in `KRAKEN/` | A book deleted on the Kobo can't come back, because its source is no longer waiting. To update a document, drop the new version in again. This replaces the push record proposed in Q8 |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -174,11 +175,10 @@ Each phase has a **definition of done**, the test of whether we can move on.
 *From the scenario walkthrough (2026-10-23): a Gutenberg EPUB, a PDF newsletter and an AI-written `.docx`
 pushed through the plan on paper.*
 
-- **Q7. After a file is sent, does it stay in `KRAKEN/`** (a library) or move to a "sent" folder (an inbox)?
-- **Q8. Push record.** Without one, a book you delete on the Kobo looks "new" and is re-sent on the next
-  plug-in. Proposal: kraken remembers each file it sent plus a hash (a fingerprint of its contents), and only
-  sends files that are new or whose hash changed. Changing the bold strength re-sends nothing unless you run
-  `kraken push --rebuild`.
+- ~~**Q7.** Does a sent file stay in `KRAKEN/` or move to a "sent" folder?~~ Closed by D22: it moves to `sent/`.
+- ~~**Q8. Push record**~~ (a hash of each sent file, so deleted books aren't re-sent): no longer needed, see D22.
+  Still to design: changing the bold strength re-sends nothing unless you run `kraken push --rebuild`, which
+  re-bolds, from `sent/`, only the books that are still on the Kobo.
 - **Q9. Design details:** a document's title when its metadata has none (proposal: its own title, else first
   heading, else filename); text bold-start skips (proposal: headings, code, web addresses); one bad file must not
   stop the others, and the notification sums up what was sent and skipped; destination folder on the Kobo;
@@ -186,6 +186,13 @@ pushed through the plan on paper.*
 - **Q10. Device test:** does re-sending an updated file keep the reading position?
 - **Q11. Should kraken be fully offline?** A snap that doesn't ask for network permission *cannot* go online,
   which would enforce R1 for kraken itself. Fonts (R11) would then be bundled inside the snap.
+  *Owner (2026-10-23):* going online is OK if it's limited to a public, open-licensed font library. A snap's
+  network permission is all-or-nothing, so that limit would be a rule in kraken's code, not enforced by Ubuntu.
+  The alternative is a curated font set bundled in the snap. Still open.
+- **Q12. Which Kobos does the released kraken support?** Nothing it does needs custom firmware. Converting
+  and bold-start produce standard EPUBs that any EPUB reader can open. Pushing and fonts should work on any Kobo,
+  the sleep screen on recent firmware, but the boot screen (R13) is Glo-only and the riskiest feature. Only the
+  Glo can be tested here.
 
 ## 8b. Spike results
 
@@ -293,3 +300,4 @@ A short diary of what actually happened, so future-us knows *why* things are the
 - **2026-10-23:** Scenario walkthrough: a Gutenberg EPUB, a PDF newsletter and an AI-written `.docx`.
   Biggest find: without a push record, books deleted on the Kobo would be re-sent (Q8). Decided the `KRAKEN`
   folder (D19), the end state of a snap release and then an archived repo (R15, D20), and the PDF ladder (D21).
+  Making `KRAKEN/` an inbox with a `sent/` folder (D22) solved the re-sent-books problem with no extra machinery.
