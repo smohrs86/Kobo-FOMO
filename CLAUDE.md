@@ -71,5 +71,5 @@ Everything committed here is published. Before any commit, check that no file co
 
 Personal data belongs in git-ignored folders (`backups/`, `downloads/`, `library/`).
 Commits use the owner's GitHub "noreply" email, never a personal address.
-The owner has chosen to describe the accessibility purpose (Irlen syndrome) publicly.
+The owner has chosen to describe the accessibility purpose (Irlen syndrome and ADHD) publicly.
 That is intentional, but don't add any further personal health detail.

@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 done. Phase 2: Spikes A and D (sleep screen) done, Spike C pending. Phase 3 (Design) next.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) next.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-23
 
@@ -15,16 +15,14 @@ account, Wi-Fi off, and a custom sleep screen installed.
 
 **Next up, in order:**
 
-1. **Phase 3, Design:** `DESIGN.md` is **drafted** (2026-10-23). The owner reviews it and answers its three
-   questions (section 12: font picker, auto-eject, folder names). On approval, record its choices as `D#`
-   entries here. Release questions (Q11, Q12, snap) wait (D23).
-2. **Phase 5, Build:** walking skeleton first (D17): font sync + auto-sync, then bold-start,
-   then document conversion, then pull, then the boot screen (R13).
+1. **Phase 4, Setup:** the Python project skeleton from `DESIGN.md` section 10: `pyproject.toml`, the
+   `boldstart/` and `kraken/` folders, a venv, pytest, and one passing test. (`DESIGN.md` approved: D24–D26.)
+2. **Phase 5, Build:** Milestone 1 of `DESIGN.md` section 12, the walking skeleton (D17): font sync + auto-sync.
+   Then bold-start, documents, pull, rebuild. Release questions (Q11, Q12, snap) wait (D23).
 3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
 
-**Waiting on the owner:** confirm the updated sleep screen displays correctly; review `DESIGN.md`;
-add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
+**Waiting on the owner:** confirm the updated sleep screen displays correctly; add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
 
 ## 1. Vision
 
@@ -106,6 +104,9 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D20 | **End state:** once kraken works, it is released once as a snap file on GitHub Releases (R15), then the repo is **archived** (made read-only) and development stops. The owner keeps running kraken locally | The goal is a finished tool, not an ongoing service. Archiving tells visitors the project is complete |
 | D22 | `KRAKEN/` is an **inbox**: after a file is copied to the Kobo *and verified*, it moves to `KRAKEN/sent/`. Push only looks at files waiting in `KRAKEN/` | A book deleted on the Kobo can't come back, because its source is no longer waiting. To update a document, drop the new version in again. This replaces the push record proposed in Q8 |
 | D23 | **Owner first, public later.** Build kraken for the owner's own Glo and computer, run from source. Snap packaging and public-release questions (R15, D20, Q11, Q12) wait until it works | Get a working tool into the owner's hands before solving other people's setups. Keeps each step small |
+| D24 | **`DESIGN.md` approved as drafted:** the `~/KRAKEN/` inbox with `sent/`, `skipped/`, `as-is/` and `pulled/`; books in `kraken/` on the Kobo as plain `.epub`; copy as `.part` then rename; auto-sync via a polling systemd user service; bold-start marker `<b class="kraken-bs">` | Reviewed by the owner, who accepted every recommendation |
+| D25 | The `kraken fonts` picker is a **checklist in the terminal**, not a window | Simple, and matches the rest of kraken, which is all terminal commands |
+| D26 | After auto-sync, kraken **ejects the Kobo automatically** (`eject_after_push = true`) | You just unplug when the notification appears. It can be turned off in settings |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -146,7 +147,7 @@ Each phase has a **definition of done**, the test of whether we can move on.
 | 0. Discovery ✅ | Get USB working, record device details | The computer sees the Kobo and its details are recorded |
 | 1. Requirements ✅ | This document | You approve sections 3–5 (approved 2026-10-23) |
 | 2. Feasibility spikes | A ✅ bold-start on the Glo's screen; C: compare converters on real sample files for each format (B, KOReader, parked by D13) | Each risky unknown is answered "yes", "no" or "yes, but…" |
-| 3. Design | Folder layout, config file format, how the pipeline steps connect | Written design you understand and approve |
+| 3. Design ✅ | Folder layout, config file format, how the pipeline steps connect | Written design you understand and approve |
 | 4. Setup | git repo, public GitHub repo `Kobo-FOMO` (started early), Python project, tests | Empty but working project skeleton on GitHub |
 | 5. Build | One feature at a time (D17): font sync + auto-sync skeleton → bold-start → document conversion → pull → boot screen | Each feature tested on the Kobo before starting the next |
 | 6. Lock-down | Remove or block Kobo services, boot into KOReader | R1 verified: no Kobo traffic |
@@ -312,4 +313,5 @@ A short diary of what actually happened, so future-us knows *why* things are the
 - **2026-10-23:** README polished (it now says the Kobo runs official firmware in Sideloaded Mode, not a
   stripped system). Decided to build the owner's own tool first (D23). Drafted `DESIGN.md`: folders, the
   8-step pipeline, four commands, settings, engine rules, auto-sync via a systemd user service, tests, and
-  milestones.
+  milestones. The owner approved it with every recommendation (D24–D26): **Phase 3 done**. Added visual
+  bold-start examples to the README (Alice, in four styles) and named ADHD there, the owner's choice.

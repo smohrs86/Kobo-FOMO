@@ -1,6 +1,6 @@
 # kraken: Design
 
-> **Status:** DRAFT, waiting for the owner's review. Nothing here is built yet.
+> **Status:** **APPROVED** 2026-10-23, with every recommendation in section 12 accepted (D24–D26). Nothing is built yet.
 > **Scope:** the owner's own tool, run from source on their computer (D23). Snap and public release come later.
 > **Source of truth for *what* and *why*:** `PLAN.md`. This file is the *how*.
 
@@ -362,7 +362,7 @@ next feature starts (Phase 5's definition of done). For example: "the font appea
 | 5 | **Rebuild** | Change strength to 0.35: books on the Kobo update; deleted ones stay deleted; reading position (Q10) |
 | (6) | Boot screen (R13, Could) | Gets its own design first |
 
-### Three questions for you
+### Three questions for you (answered 2026-10-23: all recommended)
 
 1. **Font picker:** a **checklist in the terminal** (recommended: simple, and what the rest of kraken is) or a
    small window?
