@@ -5,8 +5,18 @@ from pathlib import Path
 
 import pytest
 
-from kraken.fonts import ManifestEntry, plan_font_sync, read_catalogue
-from kraken.kobo import file_hash
+from kraken import fonts as fonts_module
+from kraken.fonts import (
+    PENDING,
+    ManifestEntry,
+    apply_font_plan,
+    fonts_on_kobo,
+    plan_font_sync,
+    read_catalogue,
+    read_manifest,
+    write_manifest,
+)
+from kraken.kobo import PART_SUFFIX, KoboError, file_hash
 
 TRUETYPE_SIGNATURE = b"\x00\x01\x00\x00"
 
@@ -240,3 +250,130 @@ def test_safety_rules_hold_in_every_combination(two_families):
                     assert all(name in manifest for name in plan.remove + plan.forget)
                     assert all(step.kobo_name.casefold() not in not_ours for step in plan.install)
                     assert all(name.casefold() not in not_ours for name in plan.remove)
+
+
+# --- Carrying out the plan (step 6), with the fake Kobo from conftest.py ---
+
+
+def sync(fake_kobo, picks: set[str], catalogue):
+    """One whole font sync, the way kraken push will do it: plan, then apply."""
+    manifest = read_manifest(fake_kobo)
+    plan = plan_font_sync(picks, catalogue, manifest, fonts_on_kobo(fake_kobo))
+    return apply_font_plan(fake_kobo, plan, manifest)
+
+
+def test_kobo_without_a_manifest_has_none(fake_kobo):
+    assert read_manifest(fake_kobo) == {}
+
+
+def test_manifest_is_saved_and_read_back(fake_kobo):
+    manifest = {"Literata-Bold.ttf": ManifestEntry("Literata", "abc123")}
+    write_manifest(fake_kobo, manifest)
+    assert read_manifest(fake_kobo) == manifest
+    assert (fake_kobo.mount / ".kraken" / "manifest.json").exists()
+
+
+@pytest.mark.parametrize("damage", ["not json at all", '{"format": 1}', '{"format": 99, "fonts": {}}', "[]"])
+def test_damaged_manifest_stops_the_font_sync(fake_kobo, damage):
+    manifest = fake_kobo.mount / ".kraken" / "manifest.json"
+    manifest.parent.mkdir()
+    manifest.write_text(damage)
+    with pytest.raises(KoboError, match="damaged"):
+        read_manifest(fake_kobo)
+
+
+def test_fonts_on_kobo_leaves_out_unfinished_copies(fake_kobo):
+    fonts = fake_kobo.mount / "fonts"
+    fonts.mkdir()
+    (fonts / "Literata-Bold.ttf").write_bytes(b"font")
+    (fonts / ("Literata-Regular.ttf" + PART_SUFFIX)).write_bytes(b"half")
+    assert fonts_on_kobo(fake_kobo) == {"Literata-Bold.ttf"}
+
+
+def test_sync_installs_ticked_fonts_and_records_them(fake_kobo, two_families):
+    result = sync(fake_kobo, {"Literata"}, two_families)
+
+    assert result.installed == LITERATA and result.problems == []
+    assert fonts_on_kobo(fake_kobo) == set(LITERATA)
+    assert read_manifest(fake_kobo) == installed(two_families, "Literata")
+
+
+def test_second_sync_changes_nothing(fake_kobo, two_families):
+    sync(fake_kobo, {"Literata"}, two_families)
+    manifest = read_manifest(fake_kobo)
+    plan = plan_font_sync({"Literata"}, two_families, manifest, fonts_on_kobo(fake_kobo))
+    assert not plan.has_changes()
+
+
+def test_unticking_removes_only_krakens_fonts(fake_kobo, two_families):
+    sync(fake_kobo, {"Literata", "Atkinson Hyperlegible"}, two_families)
+    (fake_kobo.mount / "fonts" / "MyOwnFont-Regular.ttf").write_bytes(b"added by hand")
+
+    result = sync(fake_kobo, {"Atkinson Hyperlegible"}, two_families)
+
+    assert result.removed == sorted(LITERATA)
+    assert fonts_on_kobo(fake_kobo) == {*ATKINSON, "MyOwnFont-Regular.ttf"}
+    assert set(read_manifest(fake_kobo)) == set(ATKINSON)
+
+
+def test_sync_clears_leftovers_from_an_interrupted_run(fake_kobo, two_families):
+    leftover = fake_kobo.mount / "fonts" / ("Literata-Bold.ttf" + PART_SUFFIX)
+    leftover.parent.mkdir()
+    leftover.write_bytes(b"half")
+    sync(fake_kobo, set(), two_families)
+    assert not leftover.exists()
+
+
+def test_one_failed_copy_does_not_stop_the_others(fake_kobo, two_families, monkeypatch):
+    real_copy = fonts_module.copy_to_kobo
+
+    def bold_fails(kobo, source, destination):
+        if destination.name == "Literata-Bold.ttf":
+            raise KoboError("Copying Literata-Bold.ttf to the Kobo failed: Input/output error.")
+        real_copy(kobo, source, destination)
+
+    monkeypatch.setattr(fonts_module, "copy_to_kobo", bold_fails)
+    result = sync(fake_kobo, {"Literata"}, two_families)
+
+    assert result.installed == ["Literata-Regular.ttf"]
+    assert result.problems == ["Copying Literata-Bold.ttf to the Kobo failed: Input/output error."]
+    assert read_manifest(fake_kobo)["Literata-Bold.ttf"].sha256 == PENDING  # so the next push retries
+
+
+def test_cable_pulled_mid_sync_is_finished_next_time(fake_kobo, two_families, monkeypatch):
+    """The manifest is saved before copying, so an interrupted sync can't lose track of kraken's files."""
+    real_copy = fonts_module.copy_to_kobo
+    copies = []
+
+    def cable_pulled_on_second_font(kobo, source, destination):
+        if destination.parent.name == "fonts":
+            copies.append(destination.name)
+            if len(copies) == 2:
+                raise RuntimeError("cable pulled")  # not a KoboError: kraken just stops here
+        real_copy(kobo, source, destination)
+
+    monkeypatch.setattr(fonts_module, "copy_to_kobo", cable_pulled_on_second_font)
+    with pytest.raises(RuntimeError):
+        sync(fake_kobo, {"Literata"}, two_families)
+
+    manifest = read_manifest(fake_kobo)
+    assert set(manifest) == set(LITERATA)  # both names are still claimed as kraken's
+    assert all(entry.sha256 == PENDING for entry in manifest.values())
+
+    # Plugged in again: kraken finishes the job, instead of treating its own file as hand-added.
+    monkeypatch.setattr(fonts_module, "copy_to_kobo", real_copy)
+    result = sync(fake_kobo, {"Literata"}, two_families)
+    assert result.installed == LITERATA and result.problems == []
+    assert read_manifest(fake_kobo) == installed(two_families, "Literata")
+
+
+def test_interrupted_font_that_is_then_unticked_is_removed(fake_kobo, two_families):
+    """A pending entry still means "kraken's file", so unticking cleans it up."""
+    fonts = fake_kobo.mount / "fonts"
+    fonts.mkdir()
+    (fonts / "Literata-Regular.ttf").write_bytes(b"copied before the cable was pulled")
+    write_manifest(fake_kobo, {"Literata-Regular.ttf": ManifestEntry("Literata", PENDING)})
+
+    result = sync(fake_kobo, set(), two_families)
+    assert result.removed == ["Literata-Regular.ttf"]
+    assert read_manifest(fake_kobo) == {}

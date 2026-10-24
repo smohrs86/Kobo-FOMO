@@ -179,3 +179,22 @@ def file_hash(path: Path) -> str:
 
 def _megabytes(size: int) -> str:
     return f"{size / (1024 * 1024):.0f} MB"
+
+
+# Safety rule 3, never delete a book: the only folder kraken may delete files from.
+DELETABLE_FOLDERS = ("fonts",)
+
+
+def delete_from_kobo(kobo: Kobo, destination: Path) -> None:
+    """Delete one file on the Kobo, such as fonts/Literata-Bold.ttf. Only files in fonts/ can be deleted.
+
+    The caller must only ask to delete files kraken installed (the ones in the manifest, D18).
+    """
+    target = _safe_target(kobo, destination)
+    if len(destination.parts) < 2 or destination.parts[0].casefold() not in DELETABLE_FOLDERS:
+        raise KoboError(f"Refusing to delete {destination}: kraken only ever deletes fonts it installed.")
+    try:
+        target.unlink(missing_ok=True)
+        _flush_folder(target.parent)
+    except OSError as error:
+        raise KoboError(f"Deleting {destination} from the Kobo failed: {error.strerror}.") from error

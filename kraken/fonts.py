@@ -1,14 +1,24 @@
-"""The font catalogue, and (from step 5) syncing fonts to the Kobo (DESIGN.md section 7, R11).
+"""The font catalogue, and syncing fonts to the Kobo (DESIGN.md section 7, R11).
 
 The catalogue is a folder with one sub-folder per font family, named as it should appear
 in the `kraken fonts` checklist. Each family needs a Regular, a real Bold and a licence file.
 Each file's style comes from the end of its name: Literata-Bold.ttf is the Bold.
 """
 
+import json
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from kraken.kobo import file_hash
+from kraken.kobo import (
+    PART_SUFFIX,
+    Kobo,
+    KoboError,
+    copy_to_kobo,
+    delete_from_kobo,
+    file_hash,
+    remove_leftover_parts,
+)
 from kraken.settings import data_dir
 
 STYLES = ("Regular", "Bold", "Italic", "BoldItalic")
@@ -199,3 +209,101 @@ def plan_font_sync(picks: set[str], catalogue: Catalogue, manifest: Manifest, on
             forget.append(kobo_name)  # you already deleted it on the Kobo
 
     return FontPlan(install=install, remove=remove, forget=forget, warnings=warnings)
+
+
+# --- Carrying out the plan (step 6) ---
+
+KOBO_FONTS = Path("fonts")  # where the Kobo looks for extra fonts
+MANIFEST = Path(".kraken/manifest.json")  # hidden folder, so the Kobo doesn't list it with the books
+MANIFEST_FORMAT = 1  # bumped if the file's layout ever changes
+PENDING = ""  # the fingerprint of a file whose copy hasn't been confirmed yet
+
+
+@dataclass
+class FontSyncResult:
+    """What a font sync actually did, for the notification and the log."""
+
+    installed: list[str] = field(default_factory=list)
+    removed: list[str] = field(default_factory=list)
+    problems: list[str] = field(default_factory=list)
+
+
+def fonts_on_kobo(kobo: Kobo) -> set[str]:
+    """The names of the font files in fonts/ on the Kobo, leaving out unfinished copies."""
+    folder = kobo.mount / KOBO_FONTS
+    if not folder.is_dir():
+        return set()
+    return {path.name for path in folder.iterdir() if path.is_file() and not path.name.endswith(PART_SUFFIX)}
+
+
+def read_manifest(kobo: Kobo) -> Manifest:
+    """The fonts kraken installed on this Kobo. A Kobo kraken hasn't used yet has none."""
+    path = kobo.mount / MANIFEST
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+        if data["format"] != MANIFEST_FORMAT:
+            raise ValueError(f"format {data['format']}")
+        return {name: ManifestEntry(entry["family"], entry["sha256"]) for name, entry in data["fonts"].items()}
+    except (ValueError, KeyError, TypeError, AttributeError) as error:
+        # Guessing could remove fonts kraken didn't install, so stop instead (D18).
+        raise KoboError(
+            f"kraken's list of the fonts it installed ({MANIFEST} on the Kobo) is damaged ({error}), "
+            "so fonts were left as they are."
+        ) from None
+
+
+def write_manifest(kobo: Kobo, manifest: Manifest) -> None:
+    """Save the manifest on the Kobo, using the same safe copy as everything else."""
+    data = {
+        "format": MANIFEST_FORMAT,
+        "fonts": {name: {"family": entry.family, "sha256": entry.sha256} for name, entry in sorted(manifest.items())},
+    }
+    with tempfile.TemporaryDirectory() as scratch:
+        draft = Path(scratch) / "manifest.json"
+        draft.write_text(json.dumps(data, indent=2) + "\n")
+        copy_to_kobo(kobo, draft, MANIFEST)
+
+
+def apply_font_plan(kobo: Kobo, plan: FontPlan, manifest: Manifest) -> FontSyncResult:
+    """Carry out a plan from plan_font_sync. One file failing never stops the others (safety rule 5).
+
+    The manifest is saved *before* anything is copied, with each new file marked pending. If kraken is
+    stopped halfway (say, the cable is pulled), the manifest still claims those names as kraken's, so
+    the next push finishes the job instead of mistaking kraken's own files for hand-added ones.
+    """
+    result = FontSyncResult()
+    manifest = dict(manifest)  # a copy, so the caller's manifest isn't changed behind its back
+
+    remove_leftover_parts(kobo, KOBO_FONTS)
+
+    for name in plan.remove:
+        try:
+            delete_from_kobo(kobo, KOBO_FONTS / name)
+        except KoboError as error:
+            result.problems.append(str(error))
+            continue
+        del manifest[name]
+        result.removed.append(name)
+
+    for name in plan.forget:
+        del manifest[name]
+
+    for step in plan.install:
+        manifest[step.kobo_name] = ManifestEntry(step.family, PENDING)
+    if plan.has_changes():
+        write_manifest(kobo, manifest)
+
+    for step in plan.install:
+        try:
+            copy_to_kobo(kobo, step.source, KOBO_FONTS / step.kobo_name)
+        except KoboError as error:
+            result.problems.append(str(error))
+            continue  # stays pending, so the next push tries again
+        manifest[step.kobo_name] = ManifestEntry(step.family, step.sha256)
+        result.installed.append(step.kobo_name)
+
+    if plan.install:
+        write_manifest(kobo, manifest)
+    return result

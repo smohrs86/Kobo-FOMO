@@ -7,7 +7,15 @@ from pathlib import Path
 import pytest
 
 from kraken import kobo as kobo_module
-from kraken.kobo import PART_SUFFIX, Kobo, KoboError, copy_to_kobo, find_kobo, remove_leftover_parts
+from kraken.kobo import (
+    PART_SUFFIX,
+    Kobo,
+    KoboError,
+    copy_to_kobo,
+    delete_from_kobo,
+    find_kobo,
+    remove_leftover_parts,
+)
 
 
 class PretendComputer:
@@ -103,12 +111,7 @@ def test_read_only_kobo_stops(computer, tmp_path):
         computer.find()
 
 
-# --- Copying safely (step 3), with a fake Kobo: a temporary folder with a .kobo/ inside ---
-
-
-@pytest.fixture
-def fake_kobo(tmp_path):
-    return Kobo(mount=make_kobo_files(tmp_path / "KOBOeReader"), device=Path("/dev/fake"))
+# --- Copying safely (step 3), with the fake Kobo from conftest.py ---
 
 
 @pytest.fixture
@@ -209,3 +212,23 @@ def test_leftover_clean_up_never_looks_inside_kobo_folder(fake_kobo):
 
 def test_leftover_clean_up_of_a_missing_folder_does_nothing(fake_kobo):
     assert remove_leftover_parts(fake_kobo, Path("fonts")) == []
+
+
+def test_delete_removes_a_font(fake_kobo):
+    font = fake_kobo.mount / "fonts" / "Literata-Bold.ttf"
+    font.parent.mkdir()
+    font.write_bytes(b"font")
+    delete_from_kobo(fake_kobo, Path("fonts/Literata-Bold.ttf"))
+    assert not font.exists()
+
+
+@pytest.mark.parametrize("destination", ["kraken/alice.epub", "alice.epub", "fonts", ".kobo/KoboReader.sqlite"])
+def test_delete_refuses_anything_outside_fonts(fake_kobo, destination):
+    book = fake_kobo.mount / destination
+    book.parent.mkdir(parents=True, exist_ok=True)
+    if not book.exists():
+        book.write_bytes(b"a book")
+
+    with pytest.raises(KoboError, match="Refusing to"):
+        delete_from_kobo(fake_kobo, Path(destination))
+    assert book.exists()

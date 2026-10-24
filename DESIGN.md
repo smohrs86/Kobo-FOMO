@@ -268,6 +268,12 @@ never have to edit system files by hand.
 - **On the next push,** kraken copies ticked families into `fonts/` on the Kobo, renamed to the Kobo's
   pattern (`Family-Regular.ttf`, `-Bold`, `-Italic`, `-BoldItalic`). It removes unticked families **only if the
   manifest says kraken installed them** (D18). Fonts you added by hand are never touched.
+- **The manifest** (`.kraken/manifest.json` on the Kobo) lists each font file kraken installed, with its
+  family and SHA-256 fingerprint, so unchanged fonts aren't copied again. It's saved **before** copying, with
+  new files marked *pending* (blank fingerprint), and again after. If a sync is cut off halfway, the pending
+  entries still claim those names as kraken's, so the next push finishes the job instead of mistaking
+  kraken's own files for hand-added ones. (Databases call this idea a **write-ahead log**.) A damaged
+  manifest stops the font sync rather than guessing.
 
 ---
 
@@ -280,7 +286,8 @@ These turn `CLAUDE.md`'s device rules into checks the code makes every time:
 2. **Never write inside `.kobo/`.** (The sleep screen is already done by hand. The boot screen, R13, gets its own
    design later, with backups.)
 3. **Never delete a book.** The only things kraken ever deletes on the Kobo are fonts listed in its manifest
-   and its own leftover `.kraken.part` files.
+   and its own leftover `.kraken.part` files. The delete function itself refuses anything outside `fonts/`, so even a bug
+   elsewhere can't delete a book.
 4. **Enough space?** It checks free space before copying (the Glo has 2 GB) and stops with a clear message
    if there isn't room.
 5. **One bad file never stops the others.** Each file succeeds or fails on its own, and the notification
