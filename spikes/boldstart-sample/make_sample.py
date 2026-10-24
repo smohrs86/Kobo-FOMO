@@ -6,7 +6,9 @@ does bold-start lettering look good, and help, on the Kobo Glo's screen?
 Run it with:
     python3 spikes/boldstart-sample/make_sample.py
 
-It writes out/boldstart-sample.epub, which you copy to the Kobo.
+It writes two copies of the same book to out/:
+    boldstart-sample-v2.epub        opened by Kobo's Adobe-based engine
+    boldstart-sample-v2.kepub.epub  opened by Kobo's own (newer) engine
 Only Python's standard library is used, so there's nothing to install.
 """
 
@@ -50,7 +52,7 @@ WORD_PATTERN = re.compile(r"[A-Za-z0-9]+(?:['’][A-Za-z]+)*")
 # later (decision D7), and never confused with a book's own bold text.
 BOLD_CLASS = "bs"
 
-OUTPUT = Path(__file__).parent / "out" / "boldstart-sample.epub"
+OUT_DIR = Path(__file__).parent / "out"
 
 
 def bold_count(word_length, strength):
@@ -111,7 +113,7 @@ b.bs { font-weight: bold; }
 """
 
 
-def content_opf(chapter_ids):
+def content_opf(chapter_ids, title, book_id):
     """The book's "package" file: title, list of files, and reading order."""
     manifest = "\n".join(
         f'    <item id="{cid}" href="{cid}.xhtml" media-type="application/xhtml+xml"/>'
@@ -121,18 +123,19 @@ def content_opf(chapter_ids):
     return f"""<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:identifier id="bookid">urn:kobo-fomo:spike-a:boldstart-sample</dc:identifier>
-    <dc:title>Bold-start Sample (Spike A)</dc:title>
+    <dc:identifier id="bookid">{book_id}</dc:identifier>
+    <dc:title>{html.escape(title)}</dc:title>
     <dc:creator>Kobo-FOMO</dc:creator>
     <dc:language>en</dc:language>
     <meta property="dcterms:modified">2026-10-23T00:00:00Z</meta>
   </metadata>
   <manifest>
     <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
     <item id="css" href="style.css" media-type="text/css"/>
 {manifest}
   </manifest>
-  <spine>
+  <spine toc="ncx">
 {spine}
   </spine>
 </package>
@@ -158,7 +161,27 @@ def nav_xhtml(chapters):
 """
 
 
-def build_epub(path):
+def toc_ncx(chapters, title, book_id):
+    """An older-style table of contents (EPUB 2). Kobo's Adobe-based engine expects it."""
+    points = "\n".join(
+        f'''    <navPoint id="{cid}" playOrder="{i}">
+      <navLabel><text>{html.escape(ch_title)}</text></navLabel>
+      <content src="{cid}.xhtml"/>
+    </navPoint>'''
+        for i, (cid, ch_title, _) in enumerate(chapters, start=1)
+    )
+    return f"""<?xml version="1.0" encoding="utf-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+  <head><meta name="dtb:uid" content="{book_id}"/></head>
+  <docTitle><text>{html.escape(title)}</text></docTitle>
+  <navMap>
+{points}
+  </navMap>
+</ncx>
+"""
+
+
+def build_epub(path, title, book_id):
     chapters = [(f"strength{i}", title, s) for i, (title, s) in enumerate(STRENGTHS)]
     path.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(path, "w") as epub:
@@ -166,13 +189,20 @@ def build_epub(path):
         epub.writestr("mimetype", "application/epub+zip", compress_type=zipfile.ZIP_STORED)
         deflate = zipfile.ZIP_DEFLATED
         epub.writestr("META-INF/container.xml", CONTAINER_XML, compress_type=deflate)
-        epub.writestr("OEBPS/content.opf", content_opf([c[0] for c in chapters]), compress_type=deflate)
+        epub.writestr("OEBPS/content.opf", content_opf([c[0] for c in chapters], title, book_id), compress_type=deflate)
         epub.writestr("OEBPS/nav.xhtml", nav_xhtml(chapters), compress_type=deflate)
+        epub.writestr("OEBPS/toc.ncx", toc_ncx(chapters, title, book_id), compress_type=deflate)
         epub.writestr("OEBPS/style.css", STYLE_CSS, compress_type=deflate)
         for cid, title, strength in chapters:
             epub.writestr(f"OEBPS/{cid}.xhtml", chapter_xhtml(title, strength), compress_type=deflate)
 
 
 if __name__ == "__main__":
-    build_epub(OUTPUT)
-    print(f"Wrote {OUTPUT}")
+    # Each copy gets its own title and ID so the Kobo treats them as separate books.
+    builds = [
+        ("boldstart-sample-v2.epub", "Bold-start Sample v2 (EPUB)", "urn:kobo-fomo:spike-a:v2-epub"),
+        ("boldstart-sample-v2.kepub.epub", "Bold-start Sample v2 (KEPUB)", "urn:kobo-fomo:spike-a:v2-kepub"),
+    ]
+    for filename, title, book_id in builds:
+        build_epub(OUT_DIR / filename, title, book_id)
+        print(f"Wrote {OUT_DIR / filename}")

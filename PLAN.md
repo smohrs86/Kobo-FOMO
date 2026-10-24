@@ -129,6 +129,19 @@ Each phase has a **definition of done**, the test of whether we can move on.
 - ~~Q5. GitHub repository~~: `Kobo-FOMO`, public (D11).
 - ~~Q6. Firmware~~: closed by D10.
 
+## 8b. Spike results
+
+**Spike A: bold-start on the Glo's screen** (2026-10-23)
+
+- ✅ **The core idea works.** Bold-start text is readable on the Glo's e-ink screen.
+- ✅ **Preferred strength: Light (30%).** This becomes the default.
+- ⚠️ **Issue found:** in Kobo's built-in reader, changing the font or other settings makes the sample
+  book freeze and return to the Library, even after a restart.
+  - Suspect A: the test file lacked an EPUB 2 table of contents (`toc.ncx`). v2 adds one.
+  - Suspect B: the Glo struggles to re-lay out pages on firmware 4.38.
+  - **Control test (pending):** Project Gutenberg's *Alice* (a known-good EPUB), plus sample v2 as `.epub`
+    and as `.kepub.epub` (Kobo's other engine). Change fonts in each one and compare.
+
 ## 9. Parking lot (future ideas, not this project)
 
 Good ideas go here so they're not lost, but they don't expand this project's scope.
