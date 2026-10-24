@@ -98,10 +98,11 @@ A **pipeline** is a series of steps where each step's output feeds the next. Eve
  5. CHECK      is it a valid EPUB? does toc.ncx exist? (a broken book never reaches the Kobo)
       │
       ▼
- 6. COPY       to the Kobo as "name.epub.part", then rename it to "name.epub"
+ 6. COPY       to the Kobo as "name.epub.kraken.part", flushed to the device
       │
       ▼
- 7. VERIFY     read the copy back; its hash must match the original
+ 7. VERIFY     read the copy back from the device; its hash must match the original.
+               Only then rename it to "name.epub"
       │
       ▼
  8. FILE IT    move the original to ~/KRAKEN/sent/
@@ -110,7 +111,12 @@ A **pipeline** is a series of steps where each step's output feeds the next. Eve
 **Why copy as `.part` and then rename?** Copying takes time; renaming is instant. So if the cable drops
 halfway through, all that's left is a `.part` file the Kobo ignores, never a half-finished book. Renaming
 happens all at once or not at all, which programmers call an **atomic** operation. kraken deletes leftover
-`.part` files the next time it runs.
+`.part` files the next time it runs. The ending is kraken's own, `.kraken.part`, so it can't mistake
+someone else's `.part` file for one of its leftovers.
+
+**Why "read back from the device"?** Linux keeps recently written data in memory (the **page cache**), so a
+plain read-back would check memory, not the Kobo. After flushing (`fsync`), kraken asks Linux to drop its
+memory copy of the file (`posix_fadvise`), so the check reads what actually reached the Kobo.
 
 **Titles (Q9):** the Kobo's library shows a book's *metadata* title, not its filename. If a document has no
 title, kraken uses its first heading, and if it has no headings either, its filename (`research-report` →
@@ -264,7 +270,7 @@ These turn `CLAUDE.md`'s device rules into checks the code makes every time:
 2. **Never write inside `.kobo/`.** (The sleep screen is already done by hand. The boot screen, R13, gets its own
    design later, with backups.)
 3. **Never delete a book.** The only things kraken ever deletes on the Kobo are fonts listed in its manifest
-   and its own leftover `.part` files.
+   and its own leftover `.kraken.part` files.
 4. **Enough space?** It checks free space before copying (the Glo has 2 GB) and stops with a clear message
    if there isn't room.
 5. **One bad file never stops the others.** Each file succeeds or fails on its own, and the notification
@@ -373,7 +379,7 @@ Each step has its own automatic tests and its own commit. 🔌 marks a device ch
 |---|---|---|---|
 | 1 | Settings | `settings.py` | XDG folders; creates `settings.toml` with defaults; clear messages for typos and bad values |
 | 2 | Find the Kobo | `kobo.py` | Finds the `KOBOeReader` drive in the mount list, checks for `.kobo/` (rule 1), notes its device for ejecting |
-| 3 | Safe copy | `kobo.py` | `.part` → flush → verify → rename; free-space check (rule 4); refuses paths in `.kobo/` (rule 2) |
+| 3 | Safe copy | `kobo.py` | `.kraken.part` → flush → verify from the device → rename; free-space check (rule 4); refuses paths in `.kobo/` (rule 2) |
 | 4 | Font catalogue | `fonts.py` | Families in the catalogue; each needs a Regular, a real Bold and a licence file |
 | 5 | Sync plan | `fonts.py` | Picks + catalogue + manifest → what to install and remove. Decides only. Removes only manifest fonts (D18) |
 | 6 | Apply the plan | `fonts.py` | Safe copy, then update the manifest |

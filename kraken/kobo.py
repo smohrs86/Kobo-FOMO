@@ -1,17 +1,28 @@
-"""Finding the Kobo, and (from step 3) copying to it safely (DESIGN.md sections 1 and 8).
+"""Finding the Kobo, and copying to it safely (DESIGN.md sections 1 and 8).
 
 Safety rule 1: before writing anything, check this really is the Kobo. Its drive must be
 labelled KOBOeReader *and* have Kobo's own .kobo/ folder.
+Safety rule 2: never write inside .kobo/.
+Safety rule 4: check there's enough free space before copying.
 """
 
+import hashlib
 import os
 import re
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
 KOBO_LABEL = "KOBOeReader"
 BY_LABEL_DIR = Path("/dev/disk/by-label")  # Linux keeps a shortcut here for every labelled drive
 MOUNTS_FILE = Path("/proc/self/mounts")  # Linux's live list of mounted drives
+
+# A copy in progress is written under this ending, then renamed when it's verified. The ending is
+# kraken's own, so a leftover from an interrupted copy can be recognised and safely removed.
+PART_SUFFIX = ".kraken.part"
+
+# Room left free for the Kobo itself: its database grows as you read.
+SPACE_TO_LEAVE_FREE = 50 * 1024 * 1024  # 50 MB
 
 
 class KoboError(Exception):
@@ -75,3 +86,96 @@ def _checked(kobo: Kobo, options: list[str]) -> Kobo:
     if not os.access(kobo.mount, os.W_OK):
         raise KoboError(f"You don't have permission to write to the Kobo at {kobo.mount}.")
     return kobo
+
+
+def copy_to_kobo(kobo: Kobo, source: Path, destination: Path) -> None:
+    """Copy `source` to `destination` (a path inside the Kobo, such as fonts/Literata-Regular.ttf).
+
+    The copy is written as a .kraken.part file, flushed to the device, read back from the device
+    and compared with the original, and only then renamed to its real name. So the real name never
+    points at a half-written or damaged file. An existing file with that name is replaced.
+    Raises KoboError if anything goes wrong; the Kobo is then left as it was.
+    """
+    target = _safe_target(kobo, destination)
+    _check_free_space(kobo, source)
+
+    part = target.with_name(target.name + PART_SUFFIX)
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        _write_to_device(source, part)
+        if _file_hash(part) != _file_hash(source):
+            raise KoboError(
+                f"The copy of {source.name} on the Kobo doesn't match the original. "
+                "Nothing was changed. Check the cable and try again."
+            )
+        os.replace(part, target)  # a rename: instant, so the real name is never half-written
+        _flush_folder(target.parent)
+    except OSError as error:
+        raise KoboError(f"Copying {source.name} to the Kobo failed: {error.strerror}.") from error
+    finally:
+        part.unlink(missing_ok=True)
+
+
+def remove_leftover_parts(kobo: Kobo, folder: Path) -> list[Path]:
+    """Delete unfinished copies left in `folder` on the Kobo by an interrupted run. Returns what was deleted.
+
+    Only files with kraken's own .kraken.part ending are touched (safety rule 3).
+    """
+    target = _safe_target(kobo, folder)
+    leftovers = sorted(target.glob("*" + PART_SUFFIX)) if target.is_dir() else []
+    for leftover in leftovers:
+        leftover.unlink()
+    return leftovers
+
+
+def _safe_target(kobo: Kobo, destination: Path) -> Path:
+    """The full path for `destination` on the Kobo, or raise KoboError if it's somewhere kraken mustn't write."""
+    if destination.is_absolute() or ".." in destination.parts or not destination.parts:
+        raise KoboError(f"Refusing to write to {destination}: it must be a plain path inside the Kobo.")
+    # The Kobo's drive ignores upper and lower case (.KOBO is the same folder as .kobo), so compare in lower case.
+    if destination.parts[0].lower() == ".kobo":
+        raise KoboError(f"Refusing to write to {destination}: kraken never writes inside .kobo/.")
+    return kobo.mount / destination
+
+
+def _check_free_space(kobo: Kobo, source: Path) -> None:
+    needed = source.stat().st_size + SPACE_TO_LEAVE_FREE
+    free = shutil.disk_usage(kobo.mount).free
+    if free < needed:
+        raise KoboError(
+            f"Not enough room on the Kobo for {source.name}: it needs {_megabytes(needed)} "
+            f"(including {_megabytes(SPACE_TO_LEAVE_FREE)} kept free for the Kobo), "
+            f"and {_megabytes(free)} is free. Delete some books on the Kobo and try again."
+        )
+
+
+def _write_to_device(source: Path, part: Path) -> None:
+    """Copy source to part, make sure it has really reached the device, then forget the in-memory copy.
+
+    Linux keeps recently written data in memory (the "page cache"). Without the last step, reading the
+    file back would read that memory instead of the Kobo, and the check would always pass.
+    """
+    with source.open("rb") as reader, part.open("wb") as writer:
+        shutil.copyfileobj(reader, writer)
+        writer.flush()  # from Python's buffer to Linux
+        os.fsync(writer.fileno())  # from Linux to the device; waits until the device has it
+        os.posix_fadvise(writer.fileno(), 0, 0, os.POSIX_FADV_DONTNEED)  # drop the memory copy
+
+
+def _flush_folder(folder: Path) -> None:
+    """Make sure the rename itself has reached the device, not just the file's contents."""
+    descriptor = os.open(folder, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _file_hash(path: Path) -> str:
+    """A SHA-256 fingerprint of the file: any change to the file, however small, changes it."""
+    with path.open("rb") as file:
+        return hashlib.file_digest(file, "sha256").hexdigest()
+
+
+def _megabytes(size: int) -> str:
+    return f"{size / (1024 * 1024):.0f} MB"
