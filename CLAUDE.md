@@ -12,6 +12,17 @@ on the computer converts and bolds books, then copies them to the Kobo over USB.
 `PLAN.md` is the source of truth for requirements (R#), decisions (D#), phases, risks and
 the project log. Read it before proposing work, and update it whenever a decision is made.
 
+**Starting a session:** read section 0 of `PLAN.md` ("Where we left off") first, and continue from
+its "Next up" list. **Ending a session:** update section 0 and the project log, then commit and push.
+
+## Repository layout (so far)
+
+- `PLAN.md`: plan, decisions, spike results, project log
+- `spikes/`: throwaway experiments (`boldstart-sample/` = Spike A, `screens/` = Spike D)
+- Git-ignored, local only: `backups/` (device files), `downloads/` (firmware, fonts, control books),
+  `inbox/` (documents to convert), `personal/` (owner photos and custom screens)
+- Tools available: Python 3 + Pillow, Calibre (`ebook-convert`), Pandoc, LibreOffice, `udisksctl`
+
 ## How we work
 
 - **Plan twice, code once.** Agree on the plan in writing before writing code. Ask

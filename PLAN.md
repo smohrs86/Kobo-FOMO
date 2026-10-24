@@ -1,8 +1,30 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 done. Phase 2 (feasibility spikes) in progress: Spike A done, Spike C (converters) next.
+> **Status:** Phases 0–1 done. Phase 2: Spikes A and D (sleep screen) done, Spike C pending. Phase 3 (Design) next.
+> **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-23
+
+## 0. Where we left off
+
+*A handoff note, so any session (human or AI) can pick up where the last one stopped.
+Updated at the end of every working session.*
+
+**Session ending 2026-10-23.** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
+account, Wi-Fi off, and a custom sleep screen installed.
+
+**Next up, in order:**
+
+1. **Phase 3, Design:** write `DESIGN.md` for the `kraken` tool (commands, folders, settings file,
+   code layout `boldstart/` + `kraken/`, auto-sync on plug-in, tests). Review and approve it before any code.
+   - Open question: the `kraken fonts` picker as a **terminal checklist** (recommended) or a window?
+2. **Phase 5, Build:** walking skeleton first (D17): font sync + auto-sync, then bold-start,
+   then document conversion, then pull, then the boot screen (R13).
+3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
+   Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
+
+**Waiting on the owner:** confirm the updated sleep screen displays correctly; answer the picker
+question; add sample documents to `inbox/`.
 
 ## 1. Vision
 
@@ -232,3 +254,8 @@ A short diary of what actually happened, so future-us knows *why* things are the
   which reset the Kobo to setup. Re-added `SideloadedMode=true`, then **restarted** the Kobo. It went
   straight to the home screen with no account and no pop-ups. **Lesson: the Kobo reads its settings
   file only at startup, so restart after editing it.** R1 (no Kobo account) is achieved.
+- **2026-10-23:** Spike A: bold-start works on the Glo; **30%** preferred. A reader freeze was traced
+  to a missing `toc.ncx` with a control experiment (D12). KOReader parked (D13); themes dropped.
+- **2026-10-23:** Spike D: custom sleep screen built (`spikes/screens/make_screen.py`) and working (needs
+  "Show current read" + "Show book covers full screen" ON). Boot animation format decoded. Tool named
+  `kraken` (D16). Planned font picker, auto-sync on plug-in (R14) and the walking-skeleton build order (D17).
