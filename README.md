@@ -5,7 +5,7 @@ Turning my old Kobo Glo e-reader into a calm, distraction-free reader where ever
 
 ## Why
 
-I have Irlen syndrome, which makes reading hard: my eyes struggle to track the lines and make out the
+I have Irlen syndrome and ADHD which makes reading hard: my eyes struggle to track the lines and make out the
 words, and there's a lot of shifting and merging going on. What helps me is bionic-style lettering,
 where the first part of each word is in bold. The best-known version is the Bionic Reading method:
 
