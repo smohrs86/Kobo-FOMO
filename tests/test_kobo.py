@@ -169,7 +169,7 @@ def test_damaged_copy_is_removed_and_the_old_file_kept(fake_kobo, font_file, mon
     old.write_bytes(b"old version")
     # Pretend the copy came back different: the fingerprint of the copy and the original don't match.
     fingerprints = iter(["fingerprint-of-copy", "fingerprint-of-original"])
-    monkeypatch.setattr(kobo_module, "_file_hash", lambda path: next(fingerprints))
+    monkeypatch.setattr(kobo_module, "file_hash", lambda path: next(fingerprints))
 
     with pytest.raises(KoboError, match="doesn't match the original"):
         copy_to_kobo(fake_kobo, font_file, Path("fonts/Literata-Regular.ttf"))

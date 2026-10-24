@@ -8,6 +8,7 @@ Each file's style comes from the end of its name: Literata-Bold.ttf is the Bold.
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from kraken.kobo import file_hash
 from kraken.settings import data_dir
 
 STYLES = ("Regular", "Bold", "Italic", "BoldItalic")
@@ -104,3 +105,97 @@ def _read_family(folder: Path) -> tuple[FontFamily | None, str]:
 def _looks_like_a_font(path: Path) -> bool:
     with path.open("rb") as file:
         return file.read(4) in FONT_SIGNATURES
+
+
+# --- The sync plan (step 5) ---
+#
+# Safety rule 3 and D18: kraken only removes or replaces font files it installed itself,
+# which are the ones listed in the manifest on the Kobo. Any other font is never touched.
+
+
+@dataclass(frozen=True)
+class ManifestEntry:
+    """What the manifest remembers about one font file kraken installed on the Kobo."""
+
+    family: str
+    sha256: str  # the file's fingerprint when it was installed
+
+
+# The manifest: the file's name in fonts/ on the Kobo -> what kraken remembers about it.
+Manifest = dict[str, ManifestEntry]
+
+
+@dataclass(frozen=True)
+class Install:
+    """Copy one catalogue file to fonts/ on the Kobo."""
+
+    kobo_name: str
+    source: Path
+    family: str
+    sha256: str
+
+
+@dataclass(frozen=True)
+class FontPlan:
+    """What a font sync will do. Working it out changes nothing; step 6 carries it out."""
+
+    install: list[Install] = field(default_factory=list)
+    remove: list[str] = field(default_factory=list)  # file names in fonts/, every one in the manifest
+    forget: list[str] = field(default_factory=list)  # manifest entries whose file is already gone
+    warnings: list[str] = field(default_factory=list)
+
+    def has_changes(self) -> bool:
+        return bool(self.install or self.remove or self.forget)
+
+
+def plan_font_sync(picks: set[str], catalogue: Catalogue, manifest: Manifest, on_kobo: set[str]) -> FontPlan:
+    """Work out what to install and remove so the Kobo has exactly the picked families.
+
+    picks:     the families ticked in `kraken fonts`
+    catalogue: what's in the catalogue folder on the computer
+    manifest:  the font files kraken installed on the Kobo earlier
+    on_kobo:   the names of the files in fonts/ on the Kobo right now
+    """
+    # The Kobo's drive ignores upper and lower case, so names are compared in lower case.
+    present = {name.casefold() for name in on_kobo}
+    ours = {name.casefold() for name in manifest}
+    in_catalogue = {family.name: family for family in catalogue.families}
+
+    install, warnings = [], []
+    wanted = set()  # files that should stay on the Kobo
+
+    for family_name in sorted(picks):
+        family = in_catalogue.get(family_name)
+        if family is None:
+            # Leave its files alone: removing fonts you still have ticked would be a surprise.
+            warnings.append(f"{family_name} is ticked but no longer in the catalogue, so it was left as it is")
+            wanted.update(name for name, entry in manifest.items() if entry.family == family_name)
+            continue
+
+        files = family.kobo_files()
+        not_ours = [name for name in files if name.casefold() in present and name.casefold() not in ours]
+        if not_ours:
+            warnings.append(
+                f"{family_name} was not installed: {not_ours[0]} is already on the Kobo and kraken "
+                "didn't put it there, so it won't overwrite it"
+            )
+            continue
+
+        for kobo_name, source in files.items():
+            wanted.add(kobo_name)
+            sha256 = file_hash(source)
+            entry = manifest.get(kobo_name)
+            already_there = kobo_name.casefold() in present and entry is not None and entry.sha256 == sha256
+            if not already_there:
+                install.append(Install(kobo_name, source, family_name, sha256))
+
+    remove, forget = [], []
+    for kobo_name in sorted(manifest):
+        if kobo_name in wanted:
+            continue
+        if kobo_name.casefold() in present:
+            remove.append(kobo_name)
+        else:
+            forget.append(kobo_name)  # you already deleted it on the Kobo
+
+    return FontPlan(install=install, remove=remove, forget=forget, warnings=warnings)

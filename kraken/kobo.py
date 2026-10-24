@@ -103,7 +103,7 @@ def copy_to_kobo(kobo: Kobo, source: Path, destination: Path) -> None:
     try:
         target.parent.mkdir(parents=True, exist_ok=True)
         _write_to_device(source, part)
-        if _file_hash(part) != _file_hash(source):
+        if file_hash(part) != file_hash(source):
             raise KoboError(
                 f"The copy of {source.name} on the Kobo doesn't match the original. "
                 "Nothing was changed. Check the cable and try again."
@@ -171,7 +171,7 @@ def _flush_folder(folder: Path) -> None:
         os.close(descriptor)
 
 
-def _file_hash(path: Path) -> str:
+def file_hash(path: Path) -> str:
     """A SHA-256 fingerprint of the file: any change to the file, however small, changes it."""
     with path.open("rb") as file:
         return hashlib.file_digest(file, "sha256").hexdigest()
