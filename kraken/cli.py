@@ -127,7 +127,7 @@ def build_parser() -> argparse.ArgumentParser:
     fonts = commands.add_parser("fonts", help="choose which fonts go on the Kobo")
     fonts.set_defaults(run=run_fonts)
 
-    push = commands.add_parser("push", help="send fonts to the Kobo, then eject it")
+    push = commands.add_parser("push", help="send waiting books and fonts to the Kobo, then eject it")
     push.add_argument("--dry-run", action="store_true", help="show what push would do, without doing it")
     push.set_defaults(run=lambda args: run_push(dry_run=args.dry_run))
 

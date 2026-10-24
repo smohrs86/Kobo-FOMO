@@ -54,8 +54,14 @@ def scan_inbox(inbox: Path, now: float | None = None) -> Waiting:
 
 
 def kobo_name(path: Path) -> Path:
-    """The book's place on the Kobo: research report.epub -> kraken/research report.epub (D51)."""
-    stem = "".join("_" if letter in FAT_FORBIDDEN else letter for letter in path.stem)
+    """The book's place on the Kobo: research report.epub -> kraken/research report.epub (D51).
+
+    A Kobo-format book (Alice.kepub.epub) loses its ".kepub", because kraken sends plain EPUBs (D54).
+    """
+    stem = path.stem
+    if stem.lower().endswith(".kepub"):
+        stem = stem[: -len(".kepub")]
+    stem = "".join("_" if letter in FAT_FORBIDDEN else letter for letter in stem)
     return KOBO_FOLDER / f"{stem}.epub"
 
 

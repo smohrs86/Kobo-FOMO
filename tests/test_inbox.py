@@ -87,6 +87,18 @@ def test_the_name_on_the_kobo_always_ends_in_lowercase_epub():
     assert kobo_name(Path("Alice.EPUB")) == Path("kraken/Alice.epub")
 
 
+def test_a_kobo_format_book_loses_its_kepub_ending():
+    # The Kobo reads a .kepub.epub with its own Kobo-format reader; kraken's bolded copy is a plain EPUB (D54).
+    assert kobo_name(Path("Alice.KEPUB.epub")) == Path("kraken/Alice.epub")
+
+
+def test_a_kepub_and_an_epub_of_the_same_book_clash(tmp_path):
+    epub = drop(tmp_path, "Alice.epub")
+    kepub = drop(tmp_path, "Alice.kepub.epub")
+    waiting = scan_inbox(tmp_path, NOW)
+    assert waiting.books == [epub] and waiting.clashes == [(kepub, epub)]
+
+
 def test_accents_and_other_letters_are_kept():
     assert kobo_name(Path("Les Misérables – tome 1.epub")) == Path("kraken/Les Misérables – tome 1.epub")
 

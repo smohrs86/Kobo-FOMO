@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–5 built; step 6 (books in `push.py`) next.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C (on the real Kobo) next.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-24
 
@@ -16,27 +16,24 @@ account, Wi-Fi off, custom sleep screen. *Alice* is on the Kobo, so the sleep sc
 This session: **Milestone 1 is finished** (Checkpoints A and B passed; D35–D42). **Milestone 2 was planned
 (D43–D52, steps in `DESIGN.md` section 12) and steps 1–3 are built:** the whole bold-start engine,
 `boldstart/text.py`, `page.py` and `epub.py`, with `bold_epub` and `unbold_epub`. Every page of three real
-books bolds once per word and round-trips. Steps 4 (`kraken/checks.py`) and 5 (`kraken/inbox.py`) are built too; 249 automatic tests pass.
+books bolds once per word and round-trips. Steps 4–6 are built too (`kraken/checks.py`, `kraken/inbox.py`, books
+in `kraken push`), so **`kraken push` now sends bold-start books**; 267 automatic tests pass.
 New working rule: a **💾 savepoint** (docs, commit, push) after every finished step, so a `/compact` or
 restart never loses decisions (see `CLAUDE.md`, "How we work").
 
 The Kobo's `fonts/` folder holds Atkinson Hyperlegible (all four styles, put there by kraken) and a
 hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand). **Auto-sync is on**:
-plugging in and tapping Connect is all it takes. `kraken autosync off` stops it. Note: once step 6 is built,
-auto-sync will send any `.epub` waiting in `~/KRAKEN/` on the next plug-in.
+plugging in and tapping Connect is all it takes. `kraken autosync off` stops it. **Now that step 6 is built,
+auto-sync sends any `.epub` waiting in `~/KRAKEN/` on the next plug-in.** `~/KRAKEN/` doesn't exist yet; the
+first push makes it.
 
 **Next up, in order:**
 
-1. **Milestone 2, step 6** (`DESIGN.md` section 12, "Milestone 2 steps"):
-   - 4 ✅: `kraken/checks.py`: `check_book` (before bolding) and `check_bolded` (on the copy) raise `CheckError`
-     with a plain-words reason for the `skipped/` note.
-   - 5 ✅: `kraken/inbox.py`: `scan_inbox` sorts waiting files into books, later (D49), too new (D50) and
-     clashes; `kobo_name` (D51); `file_sent` and `file_skipped` (note: D53).
-   - 6: wire into `push.py`: books before fonts, one bad book never stops the others, summary, `--dry-run`
-     lists books, bolded copy in a temporary folder (D52).
-   - Then **Checkpoint C** on the real Kobo (the checklist is in `DESIGN.md`).
-   - Optional, before C: the owner previews bolded books in Calibre's viewer (`ebook-viewer <file>`). Preview
-     files were made in a scratch folder that won't survive; make new ones with `bold_epub`.
+1. **Checkpoint C** on the real Kobo (the checklist is in `DESIGN.md` section 12). Steps:
+   - Optional first: preview a bolded book in Calibre's viewer (`ebook-viewer <file>`), made with `bold_epub`.
+   - Copy the two test EPUBs from the local `inbox/` folder into `~/KRAKEN/`, run `kraken push --dry-run` with
+     the Kobo plugged in, then plug in for real (auto-sync) and go through the checklist.
+   - Afterwards, record the results in the log and mark Milestone 2 done.
 2. **Spike C (converters):** write a short test plan for the owner to approve, then run it. Calibre and Pandoc
    are installed; samples are described in the 2026-10-24 log entries. Needed before Milestone 3.
 3. **Literata** (D33): download from its official source with the checksum and licence checked. It needs all
@@ -162,6 +159,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D51 | A book's name on the Kobo is `kraken/<original name>.epub`, with `\ : * ? " < > \|` replaced by `_` | The Kobo's FAT drive can't store those characters |
 | D52 | The bolded copy is built in a **temporary folder** and deleted after copying; `sent/` keeps only the original | The original is what `--rebuild` and `pull` work from; a second copy wastes space |
 | D53 | The note beside a file in `skipped/` is named `<file name>.why.txt`, and says what happened, when, and how to try again. Book names that differ **only in capitals** (`Alice.epub`, `alice.epub`) clash, like D51's replaced characters; `sent/` keeps one original per name on the Kobo | Chosen while building step 5 (the design didn't name the note). The Kobo's FAT drive treats upper and lower case as the same name, so two such books would overwrite each other |
+| D54 | A Kobo-format book (`Alice.kepub.epub`) loses its `.kepub` on the Kobo: `kraken/Alice.epub` | The Kobo reads a `.kepub.epub` with its own Kobo-format reader, but kraken's bolded copy is a plain EPUB (`DESIGN.md` section 1). The owner chose this on 2026-10-24 |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -441,3 +439,14 @@ A short diary of what actually happened, so future-us knows *why* things are the
   noticed that the Kobo's FAT drive ignores capitals, so `Alice.epub` and `alice.epub` clash too (D53).
   `file_sent` replaces the older original in `sent/`; `file_skipped` writes a `.why.txt` note (D53). Breaking
   key lines on purpose found one check that made no difference, now removed. 249 tests pass.
+- **2026-10-24:** **D54:** `.kepub` is dropped from book names (owner's choice). **Step 6 built:** `kraken push`
+  now sends books. Fonts are planned first (reading only, so a damaged manifest still stops before anything
+  changes), then books are sent, then fonts are synced. Each book: `check_book`, bold in a temporary folder
+  (D52), `check_bolded`, safe copy to `kraken/`, then the original goes to `sent/`. A book kraken can't use
+  (locked, no `toc.ncx`, a broken page, or a bolded copy that fails its check) goes to `skipped/` with a note,
+  and doesn't count as a problem. A failed copy, or an unexpected error, leaves the book in the inbox for next
+  time and *is* a problem; the other books still go. Leftover `.kraken.part` files in `kraken/` are removed.
+  The summary reads like "Books: 2 sent, 1 skipped (see skipped/), 1 waiting. Fonts: … Safe to unplug.", and the
+  terminal names every waiting file and why. `--dry-run` checks each book and says "would send" or "would
+  skip", without bolding or creating anything. Breaking key lines on purpose found three gaps in the tests
+  (the toc check, the bolded-copy check, and a broken page), now covered. 267 tests pass.
