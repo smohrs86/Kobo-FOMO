@@ -148,6 +148,7 @@ right. You can judge it in a second.
 | `kraken pull` | Lists the books kraken put on the Kobo; you pick one; it lands in `~/KRAKEN/pulled/` without bold-start |
 | `kraken fonts` | A checklist of the fonts in the catalogue; your picks are installed or removed on the next push |
 | `kraken autosync on` / `off` | Turns automatic push-on-plug-in on or off (section 6) |
+| `kraken autosync` | Says whether auto-sync is on or off (D42) |
 
 `--rebuild` only touches books **still on the Kobo**, so it can't bring back books you deleted.
 
@@ -238,6 +239,20 @@ never have to edit system files by hand.
 **When the Kobo appears:** wait for the drive to settle → `kraken push` → eject safely
 (`udisksctl unmount`, then `udisksctl power-off`, the same steps you already use by hand) → notification
 (`notify-send`). The Kobo then shows its "you can unplug" state, and you unplug.
+
+**The details (approved 2026-10-24, D37–D42):**
+- **Settled** = seen mounted on two checks in a row (D37).
+- **Once per plug-in:** after a push, the watcher waits for the Kobo to disappear and come back (D38).
+- **No retries:** a failed push is reported by notification, and the next plug-in tries again (D39).
+- **Busy:** if kraken is already running by hand, the watcher steps aside for that plug-in (D40).
+- **Already there at start:** a Kobo that's connected when the watcher starts is pushed (D41).
+- **The unit file** is `~/.config/systemd/user/kraken-autosync.service`. It runs the venv's
+  `kraken autosync watch`, restarts it if it crashes, and starts at log-in. `off` switches the service off
+  and deletes the file. Running `on` again rewrites the file and restarts the service, so it also fixes a
+  moved venv.
+- **Risk to check at Checkpoint B:** a background service isn't quite inside the desktop session, so the
+  notification and the eject (polkit, Ubuntu's permission system) may behave differently from a terminal.
+  If the eject is refused, the notification says so and you eject from the file manager.
 
 **Alternatives considered:**
 - A **udev rule** (Linux's hardware-event system) would react instantly, but it runs as root and before the
