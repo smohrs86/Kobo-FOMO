@@ -32,13 +32,16 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
 | R1 | No Kobo store, no Kobo account, no contact with Kobo servers | Must |
 | R2 | Read my own EPUB files | Must |
 | R3 | **Bold-start lettering** (bionic-style) on everything I read, to help with Irlen syndrome | **Must** |
-| R4 | Themed reading styles (fonts, margins, sizes) that I can switch between | Should |
+| R4 | ~~Themed reading styles~~ | Removed (2026-10-23): not needed; the Glo's built-in settings are enough |
 | R5 | Documents in these formats can be put on the reader: Google Docs (downloaded as `.docx`), Word `.docx`, LibreOffice/OpenOffice `.odt`, text-based `.pdf`, `.txt`, Markdown `.md` | Should |
 | R6 | ~~News feeds by region and topic search~~ | Removed (D5) |
 | R7 | ~~News filtering~~ | Removed (D5) |
 | R8 | **Push:** new and changed files go from a folder on my computer to the reader over USB. Sync never deletes anything from the reader; I delete books on the reader myself | Must |
 | R9 | No bloat: only the features listed here | Must |
 | R10 | **Pull:** copy a document from the reader back to my computer, without the bold-start formatting | Should |
+| R11 | **More fonts:** traditional press (serif) fonts and more sans-serif fonts, each with a real **Bold** (bold-start depends on it). Open-licensed only | Should |
+| R12 | **Custom sleep screen:** our own graphic when the Kobo is asleep or powered off | Should |
+| R13 | **Custom power-on screen:** our own graphic in the boot animation | Could |
 
 ### Out of scope (deliberately not doing)
 
@@ -71,6 +74,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D12 | Every EPUB the pipeline outputs **must include an EPUB 2 `toc.ncx`** (adding one if the source book lacks it), and is checked automatically before it's copied | Spike A proved a missing `toc.ncx` freezes Kobo's Adobe-based reader when settings change |
 | D13 | Use **Kobo's built-in reader** (in Sideloaded Mode); KOReader is parked (P2) | After Sideloaded Mode (R1 ✅) and Spike A, the built-in reader does everything needed so far. "YAGNI": don't add complexity until it's needed |
 | D14 | *Pending Spike C:* choose the converter. Option 1: **Pandoc** for documents plus a PDF tool. Option 2: **Calibre** for everything | Decided by comparing real output on the Kobo, not by guessing |
+| D15 | Change only the boot **animation** frames (`/etc/images/kraken-on-*.raw.gz`), never the bootloader's first logo | Replacing animation images can't stop the Kobo from starting, and is easy to undo. The bootloader logo lives in a raw area where a mistake could brick the device |
 
 ## 5. Architecture
 
@@ -149,13 +153,24 @@ Each phase has a **definition of done**, the test of whether we can move on.
     `toc.ncx`** (suspect A). The Glo itself is fine. The fix is now design rule D12.
 - ✅ **Kobo's built-in reader handles bold-start well** once the file is correct, in both engines.
 
+**Research for R11–R13** (2026-10-23)
+
+- **Fonts:** copy `.ttf` or `.otf` files into a `fonts/` folder at the top of the Kobo drive, named
+  `Family-Regular`, `-Bold`, `-Italic`, `-BoldItalic`. No hacks needed.
+- **Sleep screen:** images in `.kobo/screensaver/` are shown when the Kobo sleeps (unofficial; reported
+  working on firmware 4.37+). Needs a setting under *Energy saving and privacy*. To test on the Glo.
+- **Boot animation:** the Glo (codename *kraken*) loops 6 frames, `/etc/images/kraken-on-0…5.raw.gz`,
+  showing three loading dots. Format decoded from the firmware: **758 × 1024 portrait, 16-bit RGB565
+  (little-endian), gzipped**. They'd be replaced via a `KoboRoot.tgz` containing only those images.
+  The originals are in the firmware package, so it can be undone.
+
 ## 9. Parking lot (future ideas, not this project)
 
 Good ideas go here so they're not lost, but they don't expand this project's scope.
 
 - **P1. Bold-start desktop app for Ubuntu, packaged as a snap.** It reuses the `boldstart/`
   engine (D8), which is why that engine is built as a separate library from day one.
-- **P2. KOReader**, if Kobo's built-in reader settings turn out not to be enough for R4 (themes). See D13.
+- **P2. KOReader**, if Kobo's built-in reader ever proves not to be enough. See D13.
 - **P3. Automatic Google Drive sync**, instead of downloading Google Docs as `.docx` by hand.
 
 ## 10. Glossary
