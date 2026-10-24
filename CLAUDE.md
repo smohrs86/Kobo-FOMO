@@ -37,6 +37,10 @@ its "Next up" list. **Ending a session:** update section 0 and the project log, 
   or renumbered; dropped items are struck through.
 - Commit and push meaningful changes without asking, **after** the privacy check below.
   Commit messages explain *why*. If the check finds anything personal, stop and ask.
+- **Savepoint after every finished step, checkpoint, spike or milestone.** Update section 0 of
+  `PLAN.md` (Status line and "Next up"), the project log, any `D#` decisions agreed in chat, and
+  step statuses in `DESIGN.md`. Then do the privacy check, commit and push, and end with one line,
+  "💾 Savepoint: …", saying what was saved. That line tells the owner it's safe to `/compact` or restart.
 
 ## Device safety rules
 

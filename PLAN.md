@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 steps 1–8 built; Checkpoint A next.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–4 built; step 5 (`kraken/inbox.py`) next.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-24
 
@@ -16,7 +16,9 @@ account, Wi-Fi off, custom sleep screen. *Alice* is on the Kobo, so the sleep sc
 This session: **Milestone 1 is finished** (Checkpoints A and B passed; D35–D42). **Milestone 2 was planned
 (D43–D52, steps in `DESIGN.md` section 12) and steps 1–3 are built:** the whole bold-start engine,
 `boldstart/text.py`, `page.py` and `epub.py`, with `bold_epub` and `unbold_epub`. Every page of three real
-books bolds once per word and round-trips. 210 automatic tests pass.
+books bolds once per word and round-trips. Step 4 (`kraken/checks.py`) is built too; 227 automatic tests pass.
+New working rule: a **💾 savepoint** (docs, commit, push) after every finished step, so a `/compact` or
+restart never loses decisions (see `CLAUDE.md`, "How we work").
 
 The Kobo's `fonts/` folder holds Atkinson Hyperlegible (all four styles, put there by kraken) and a
 hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand). **Auto-sync is on**:
