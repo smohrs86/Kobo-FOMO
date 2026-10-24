@@ -22,6 +22,7 @@ The owner's own tool comes first, and the public snap release later (D23). **No 
 **Next up, in order:**
 
 1. **Phase 5, Build:** Milestone 1 of `DESIGN.md` section 12, the walking skeleton (D17): font sync + auto-sync.
+   Its step list (steps 1–9, checkpoints A and B) is approved (D31–D34). Step 1 is settings.
    Then bold-start, documents, pull, rebuild. Release questions (Q11, Q12, snap) wait (D23).
 2. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
@@ -115,6 +116,10 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D28 | The command line uses **argparse**, from Python's standard library | Nothing extra to install. Click is nicer but would be one more dependency |
 | D29 | kraken needs **Python 3.12 or newer** | 3.12 is the oldest Python still supported on current Ubuntu releases, and it includes `tomllib` for reading `settings.toml` |
 | D30 | Subcommands appear **in the milestone that builds them**, not as stubs | `kraken --help` never advertises something that doesn't work yet |
+| D31 | The `kraken fonts` checklist is a **numbered list**: type a number to tick or untick, Enter to save. Built with Python's `input()` | Nothing to install (D27) and easy to test. An arrow-key menu would need a library |
+| D32 | `kraken push --dry-run` is built **in Milestone 1** | The font sync plan is already worked out before anything is touched, so printing it is nearly free, and it's a safety net for the first push to the real Kobo |
+| D33 | Starter font catalogue: **Atkinson Hyperlegible** (sans-serif) and **Literata** (serif). Fonts are added to the catalogue by hand, together, with licences checked | Covers both kinds R11 asks for and keeps the first device test small. More families need no code changes. kraken itself never goes online (DESIGN.md section 8, rule 6) |
+| D34 | The lock and the log live in `~/.local/state/kraken/`. The lock uses **`flock`**, the operating system's file locking | If kraken crashes, the OS releases the lock by itself, so a stale "busy" lock can't get stuck |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture

@@ -365,6 +365,24 @@ next feature starts (Phase 5's definition of done). For example: "the font appea
 | 5 | **Rebuild** | Change strength to 0.35: books on the Kobo update; deleted ones stay deleted; reading position (Q10) |
 | (6) | Boot screen (R13, Could) | Gets its own design first |
 
+### Milestone 1 steps (approved 2026-10-23, D31–D34)
+
+Each step has its own automatic tests and its own commit. 🔌 marks a device checkpoint.
+
+| # | Step | File | What it does |
+|---|---|---|---|
+| 1 | Settings | `settings.py` | XDG folders; creates `settings.toml` with defaults; clear messages for typos and bad values |
+| 2 | Find the Kobo | `kobo.py` | Finds the `KOBOeReader` drive in the mount list, checks for `.kobo/` (rule 1), notes its device for ejecting |
+| 3 | Safe copy | `kobo.py` | `.part` → flush → verify → rename; free-space check (rule 4); refuses paths in `.kobo/` (rule 2) |
+| 4 | Font catalogue | `fonts.py` | Families in the catalogue; each needs a Regular, a real Bold and a licence file |
+| 5 | Sync plan | `fonts.py` | Picks + catalogue + manifest → what to install and remove. Decides only. Removes only manifest fonts (D18) |
+| 6 | Apply the plan | `fonts.py` | Safe copy, then update the manifest |
+| 7 | `kraken fonts` | `cli.py` | The numbered checklist (D31); picks saved in kraken's data folder |
+| 8 | `kraken push` | `cli.py`, `notify.py` | Find → font sync → eject → notify; the `flock` lock and log (D34); `--dry-run` (D32) |
+| 🔌 A | Device test | | Starter catalogue (D33). Tick, push, font in menu; untick, push, gone; hand-added font survives; `.kraken/` not shown as books; does the Kobo need a restart to see new fonts? |
+| 9 | Auto-sync | `autosync.py` | Watcher (every 3 s), pushes **once per plug-in**; `kraken autosync on`/`off` writes the systemd unit |
+| 🔌 B | Device test | | Plug in, tap *Connect*: push, eject and notification happen by themselves |
+
 ### Three questions for you (answered 2026-10-23: all recommended)
 
 1. **Font picker:** a **checklist in the terminal** (recommended: simple, and what the rest of kraken is) or a
