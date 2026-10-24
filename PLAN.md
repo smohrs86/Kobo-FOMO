@@ -33,8 +33,8 @@ write-ahead manifest, `kraken fonts` and `kraken push` (with lock, log, eject, n
 2. **Step 9, auto-sync** (`kraken autosync on`/`off`, the watcher, the systemd unit), then **Checkpoint B**.
    That finishes Milestone 1. Then Milestone 2 (bold-start EPUBs). Release questions (Q11, Q12, snap) wait (D23).
 3. **Spike C (converters):** Calibre and Pandoc are both installed. **Samples are in `inbox/`** (see the
-   2026-10-24 log entry); only a Google Docs `.docx` is missing, and that's optional. Next: write a short
-   test plan for the owner to approve, then run it.
+   2026-10-24 log entry), one for every R5 format. Next: write a short test plan for the owner to approve,
+   then run it.
 
 **Update 2026-10-24:** the font catalogue now holds Atkinson Hyperlegible, ready for Checkpoint A.
 
@@ -370,5 +370,8 @@ A short diary of what actually happened, so future-us knows *why* things are the
   `read_catalogue()` reads it with no problems. Literata not added yet. The owner put Spike C samples in
   `inbox/`: one article as `.md`, `.txt` and `.pdf`; an AI-written `.docx` (made with python-docx) and the
   same text as `.odt` (made with Pandoc); three more text PDFs (a web page printed from a browser, a
-  page-layout booklet, a book); two DRM-free EPUBs. Still missing: a `.docx` exported from Google Docs
-  (optional). Decided not to support RTF (D35).
+  page-layout booklet, a book); two DRM-free EPUBs; and a `.docx` downloaded from Google Docs.
+  The Google one is built differently: no `docProps/` folder, no paragraph styles at all, so its section
+  titles are plain paragraphs and converters won't see them as headings. It also has 43 Chinese characters,
+  which tests what happens when a font (such as Atkinson) has no glyphs for them. Decided not to support
+  RTF (D35).
