@@ -18,6 +18,7 @@ its "Next up" list. **Ending a session:** update section 0 and the project log, 
 ## Repository layout (so far)
 
 - `PLAN.md`: plan, decisions, spike results, project log
+- `DESIGN.md`: approved design for the `kraken` tool (folders, pipeline, commands, tests, milestones)
 - `spikes/`: throwaway experiments (`boldstart-sample/` = Spike A, `screens/` = Spike D)
 - Git-ignored, local only: `backups/` (device files), `downloads/` (firmware, fonts, control books),
   `inbox/` (documents to convert), `personal/` (owner photos and custom screens)

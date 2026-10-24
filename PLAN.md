@@ -10,8 +10,12 @@
 *A handoff note, so any session (human or AI) can pick up where the last one stopped.
 Updated at the end of every working session.*
 
-**Session ending 2026-10-23.** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
+**Session ending 2026-10-23 (evening).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
 account, Wi-Fi off, and a custom sleep screen installed.
+
+This session: a scenario walkthrough found gaps (section 8, Q7–Q12); decisions D19–D26 were made;
+`DESIGN.md` was written and **approved** (Phase 3 done); the README was polished, with bold-start examples.
+The owner's own tool comes first, and the public snap release later (D23). **No code has been written yet.**
 
 **Next up, in order:**
 
