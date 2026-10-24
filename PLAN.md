@@ -67,6 +67,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D9 | No full device backup (your call, since your risk tolerance is "adventurous"). Before editing any single file on the Kobo, we still save a copy of it first | The Glo has a factory reset as the recovery path, and copying individual files costs nothing |
 | D10 | Install firmware **4.38.23429** (Aug 2025, the Glo's newest) **by hand over USB**, never over Wi-Fi | Modern KOReader launchers (NickelMenu) need 4.6+; 4.31+ has "sideloaded mode" to hide the store; it's already the latest, so the Kobo has nothing to auto-update to |
 | D11 | GitHub repo is **public** (GPL-3.0), not private | It's a portfolio piece showing how AI can support accessibility. Nothing personal is ever committed (see `CLAUDE.md`, Privacy) |
+| D12 | Every EPUB the pipeline outputs **must include an EPUB 2 `toc.ncx`** (adding one if the source book lacks it), and is checked automatically before it's copied | Spike A proved a missing `toc.ncx` freezes Kobo's Adobe-based reader when settings change |
 
 ## 5. Architecture
 
@@ -139,8 +140,11 @@ Each phase has a **definition of done**, the test of whether we can move on.
   book freeze and return to the Library, even after a restart.
   - Suspect A: the test file lacked an EPUB 2 table of contents (`toc.ncx`). v2 adds one.
   - Suspect B: the Glo struggles to re-lay out pages on firmware 4.38.
-  - **Control test (pending):** Project Gutenberg's *Alice* (a known-good EPUB), plus sample v2 as `.epub`
-    and as `.kepub.epub` (Kobo's other engine). Change fonts in each one and compare.
+  - **Control test:** Project Gutenberg's *Alice* (a known-good EPUB), plus sample v2 as `.epub`
+    and as `.kepub.epub` (Kobo's other engine). Each was opened, its font changed, and a page turned.
+  - ✅ **Result:** all three worked perfectly; only the original v1 sample froze. **Root cause: the missing
+    `toc.ncx`** (suspect A). The Glo itself is fine. The fix is now design rule D12.
+- ✅ **Kobo's built-in reader handles bold-start well** once the file is correct, in both engines.
 
 ## 9. Parking lot (future ideas, not this project)
 
