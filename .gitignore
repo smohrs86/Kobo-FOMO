@@ -1,0 +1,32 @@
+# --- Never publish: personal or device-identifying data ---
+# Copies of the Kobo's databases and settings (contain the device serial and IDs)
+backups/
+
+# Kobo firmware and other downloaded third-party files (copyrighted, and too large for GitHub)
+downloads/
+
+# Personal reading material: books and documents stay on this computer only
+library/
+inbox/
+pulled/
+
+# Local-only settings and secrets
+*.local.*
+.env
+.claude/settings.local.json
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# --- Editors and operating systems ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
