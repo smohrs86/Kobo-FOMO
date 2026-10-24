@@ -15,17 +15,16 @@ account, Wi-Fi off, and a custom sleep screen installed.
 
 **Next up, in order:**
 
-1. **Phase 3, Design:** write `DESIGN.md` for the `kraken` tool (commands, folders, settings file,
-   code layout `boldstart/` + `kraken/`, auto-sync on plug-in, tests). Review and approve it before any code.
-   - Open question: the `kraken fonts` picker as a **terminal checklist** (recommended) or a window?
-   - Must cover the walkthrough items Q8–Q10 (section 8). Release questions (Q11, Q12, snap) wait (D23).
+1. **Phase 3, Design:** `DESIGN.md` is **drafted** (2026-10-23). The owner reviews it and answers its three
+   questions (section 12: font picker, auto-eject, folder names). On approval, record its choices as `D#`
+   entries here. Release questions (Q11, Q12, snap) wait (D23).
 2. **Phase 5, Build:** walking skeleton first (D17): font sync + auto-sync, then bold-start,
    then document conversion, then pull, then the boot screen (R13).
 3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
 
-**Waiting on the owner:** confirm the updated sleep screen displays correctly; answer the picker
-question; add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
+**Waiting on the owner:** confirm the updated sleep screen displays correctly; review `DESIGN.md`;
+add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
 
 ## 1. Vision
 
@@ -249,6 +248,9 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
 |---|---|
 | ADR | Architecture Decision Record: a written note of a decision and why it was made |
 | Archive (GitHub) | Marking a repository read-only: still public and downloadable, but finished |
+| Atomic | Happens completely or not at all, with no half-done state (for example, renaming a file) |
+| Dependency | A library your program needs that someone else wrote |
+| Interface | An agreed shape that parts of a program follow, so one part can be swapped for another |
 | Brick | To leave a device unable to start, "as useful as a brick" |
 | Conflict (sync) | When the same file changed in two places and a program must guess which one wins |
 | DRM | Digital Rights Management: a lock on a file that controls who can open it |
@@ -262,6 +264,7 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
 | Nickel | Kobo's own reading software |
 | Parking lot | A list of good ideas deliberately held for later |
 | Pipeline | A series of steps where each one's output feeds the next |
+| Polling | Checking for something at regular intervals ("is the Kobo there yet?") |
 | Push / Pull | Sending files *to* a place / fetching files *from* a place |
 | Scope | What a project will and won't do |
 | Separation of concerns | Splitting code so each part has one job and doesn't depend on unrelated parts |
@@ -269,6 +272,10 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
 | Snap | Ubuntu's app package format, installed with `snap install` |
 | Snap confinement | The walls around a snap: it can only reach what it declares (USB drives, network, notifications) |
 | Source of truth | The one place whose copy wins if two copies disagree |
+| systemd user service | A background program Ubuntu starts and looks after for you, running as you (not as root) |
+| Test double | A stand-in used in tests, such as a temporary folder pretending to be the Kobo |
+| TOML | A simple settings-file format meant to be read and edited by people |
+| Virtual environment (venv) | A private Python installation for one project, so its libraries don't clash with others |
 
 ## 11. Project log
 
@@ -302,3 +309,7 @@ A short diary of what actually happened, so future-us knows *why* things are the
   Biggest find: without a push record, books deleted on the Kobo would be re-sent (Q8). Decided the `KRAKEN`
   folder (D19), the end state of a snap release and then an archived repo (R15, D20), and the PDF ladder (D21).
   Making `KRAKEN/` an inbox with a `sent/` folder (D22) solved the re-sent-books problem with no extra machinery.
+- **2026-10-23:** README polished (it now says the Kobo runs official firmware in Sideloaded Mode, not a
+  stripped system). Decided to build the owner's own tool first (D23). Drafted `DESIGN.md`: folders, the
+  8-step pipeline, four commands, settings, engine rules, auto-sync via a systemd user service, tests, and
+  milestones.
