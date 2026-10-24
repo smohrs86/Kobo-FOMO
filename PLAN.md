@@ -40,7 +40,7 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
 | R9 | No bloat: only the features listed here | Must |
 | R10 | **Pull:** copy a document from the reader back to my computer, without the bold-start formatting | Should |
 | R11 | **More fonts:** traditional press (serif) fonts and more sans-serif fonts, each with a real **Bold** (bold-start depends on it). Open-licensed only | Should |
-| R12 | **Custom sleep screen:** our own graphic when the Kobo is asleep or powered off | Should |
+| R12 | **Custom sleep screen:** our own graphic when the Kobo is asleep or powered off ✅ (sleep) | Should |
 | R13 | **Custom power-on screen:** our own graphic in the boot animation | Could |
 
 ### Out of scope (deliberately not doing)
@@ -170,7 +170,10 @@ Each phase has a **definition of done**, the test of whether we can move on.
 - `spikes/screens/make_screen.py` builds a 758 × 1024, 16-grey sleep screen: a framed picture, a
   bold-start title (30%, Atkinson Hyperlegible), an optional emoji (Noto Emoji, black and white), and a footer
   where `**marked**` words are bold. Personal images and text are passed in at run time and stay in `personal/`.
-- Installed as `.kobo/screensaver/kraken.png`. **Pending:** confirm it shows on the Glo once the setting is on.
+- ✅ **Works on the Glo (firmware 4.38).** It needs **both** settings under *Energy saving and privacy*:
+  **"Show current read" ON** and **"Show book covers full screen" ON**. With "Show current read" off,
+  the Kobo shows a blank "Sleeping" screen. PNG (greyscale) works; JPEG wasn't needed.
+- Only one image is kept in `.kobo/screensaver/`: with several, the Kobo picks one at random.
 
 ## 9. Parking lot (future ideas, not this project)
 

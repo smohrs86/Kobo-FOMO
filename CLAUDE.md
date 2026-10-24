@@ -39,6 +39,8 @@ the project log. Read it before proposing work, and update it whenever a decisio
 - The Kobo reads `.kobo/Kobo/Kobo eReader.conf` **only at startup**: restart it after editing.
 - The device runs firmware 4.38.23429 in **Sideloaded Mode** (`SideloadedMode=true`), with no Kobo account.
 - The Kobo mounts at `/run/media/$USER/KOBOeReader`; device files live in `.kobo/`.
+- Custom sleep screen: one image in `.kobo/screensaver/`, with both "Show current read" and
+  "Show book covers full screen" ON (Settings → Energy saving and privacy).
 
 ## Legal and ethical rules
 
