@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 done. Phase 2 (feasibility spikes) in progress: Spike A, bold-start sample.
+> **Status:** Phases 0–1 done. Phase 2 (feasibility spikes) in progress: Spike A done, Spike C (converters) next.
 > **Last updated:** 2026-10-23
 
 ## 1. Vision
@@ -33,7 +33,7 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
 | R2 | Read my own EPUB files | Must |
 | R3 | **Bold-start lettering** (bionic-style) on everything I read, to help with Irlen syndrome | **Must** |
 | R4 | Themed reading styles (fonts, margins, sizes) that I can switch between | Should |
-| R5 | Google Docs and PDFs can be put on the reader and read | Should |
+| R5 | Documents in these formats can be put on the reader: Google Docs (downloaded as `.docx`), Word `.docx`, LibreOffice/OpenOffice `.odt`, text-based `.pdf`, `.txt`, Markdown `.md` | Should |
 | R6 | ~~News feeds by region and topic search~~ | Removed (D5) |
 | R7 | ~~News filtering~~ | Removed (D5) |
 | R8 | **Push:** new and changed files go from a folder on my computer to the reader over USB. Sync never deletes anything from the reader; I delete books on the reader myself | Must |
@@ -46,6 +46,7 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
   which can't be converted to bold-start text. (Decision D2.)
 - **News / RSS feeds.** (Decision D5.)
 - **Automatic two-way sync.** (Decision D6.)
+- **Scanned PDFs** (images of text). They would need OCR (text recognition); only PDFs with selectable text are supported.
 - Games, the Kobo store, social features, cloud accounts.
 - Writing a reading app from scratch. (Decision D1.)
 
@@ -56,7 +57,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 
 | ID | Decision | Why |
 |---|---|---|
-| D1 | Use **KOReader** (open source) as the reading app instead of building one | It supports the Glo, has no store, and has 10+ years of community work. We spend our effort on what makes it *ours* |
+| ~~D1~~ | ~~Use **KOReader** (open source) as the reading app instead of building one~~ (superseded by D13) | It supports the Glo, has no store, and has 10+ years of community work. We spend our effort on what makes it *ours* |
 | D2 | **No Libby** on the device | DRM conflicts with R1 and R3, and removing DRM breaks loan terms and the law. Simplicity wins |
 | D3 | Name the feature "bold-start" (or a name we choose), not "Bionic Reading" | "Bionic Reading" is a trademark of its inventor's company |
 | D4 | **"Smart computer, simple reader."** All conversion happens on the computer, and the Kobo only displays the results | The computer is about 50× faster, easier to test on, and can't be bricked |
@@ -68,6 +69,8 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D10 | Install firmware **4.38.23429** (Aug 2025, the Glo's newest) **by hand over USB**, never over Wi-Fi | Modern KOReader launchers (NickelMenu) need 4.6+; 4.31+ has "sideloaded mode" to hide the store; it's already the latest, so the Kobo has nothing to auto-update to |
 | D11 | GitHub repo is **public** (GPL-3.0), not private | It's a portfolio piece showing how AI can support accessibility. Nothing personal is ever committed (see `CLAUDE.md`, Privacy) |
 | D12 | Every EPUB the pipeline outputs **must include an EPUB 2 `toc.ncx`** (adding one if the source book lacks it), and is checked automatically before it's copied | Spike A proved a missing `toc.ncx` freezes Kobo's Adobe-based reader when settings change |
+| D13 | Use **Kobo's built-in reader** (in Sideloaded Mode); KOReader is parked (P2) | After Sideloaded Mode (R1 ✅) and Spike A, the built-in reader does everything needed so far. "YAGNI": don't add complexity until it's needed |
+| D14 | *Pending Spike C:* choose the converter. Option 1: **Pandoc** for documents plus a PDF tool. Option 2: **Calibre** for everything | Decided by comparing real output on the Kobo, not by guessing |
 
 ## 5. Architecture
 
@@ -106,7 +109,7 @@ Each phase has a **definition of done**, the test of whether we can move on.
 |---|---|---|
 | 0. Discovery ✅ | Get USB working, record device details | The computer sees the Kobo and its details are recorded |
 | 1. Requirements ✅ | This document | You approve sections 3–5 (approved 2026-10-23) |
-| 2. Feasibility spikes | Small throwaway experiments: install KOReader; test bold text on the Glo's screen; test PDF conversion | Each risky unknown is answered "yes", "no" or "yes, but…" |
+| 2. Feasibility spikes | A ✅ bold-start on the Glo's screen; C: compare converters on real sample files for each format (B, KOReader, parked by D13) | Each risky unknown is answered "yes", "no" or "yes, but…" |
 | 3. Design | Folder layout, config file format, how the pipeline steps connect | Written design you understand and approve |
 | 4. Setup | git repo, public GitHub repo `Kobo-FOMO` (started early), Python project, tests | Empty but working project skeleton on GitHub |
 | 5. Build | One feature at a time, in order: push → bold-start → Docs/PDF → pull → themes | Each feature tested on the Kobo before starting the next |
@@ -152,6 +155,8 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
 
 - **P1. Bold-start desktop app for Ubuntu, packaged as a snap.** It reuses the `boldstart/`
   engine (D8), which is why that engine is built as a separate library from day one.
+- **P2. KOReader**, if Kobo's built-in reader settings turn out not to be enough for R4 (themes). See D13.
+- **P3. Automatic Google Drive sync**, instead of downloading Google Docs as `.docx` by hand.
 
 ## 10. Glossary
 
