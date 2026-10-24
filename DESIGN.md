@@ -402,7 +402,7 @@ next feature starts (Phase 5's definition of done). For example: "the font appea
 
 | # | Feature | Device test |
 |---|---|---|
-| 1 | **Skeleton:** settings, find the Kobo, font catalogue and checklist, copy + verify, manifest, eject, notify, auto-sync | Tick a font, plug in: it's in the font menu. Untick it, plug in: it's gone. Your own fonts are untouched |
+| 1 ✅ | **Skeleton:** settings, find the Kobo, font catalogue and checklist, copy + verify, manifest, eject, notify, auto-sync | Tick a font, plug in: it's in the font menu. Untick it, plug in: it's gone. Your own fonts are untouched |
 | 2 | **Bold-start EPUBs:** the engine, the inbox for `.epub`, `sent/` | The Gutenberg book arrives in bold-start; deleting it on the Kobo, then plugging in again, does *not* bring it back |
 | 3 | **Documents:** Spike C first, then converters, the PDF ladder, `skipped/`, `as-is/` | Your newsletter and research report read well |
 | 4 | **Pull** | A pulled document matches the original, with no bold-start left |
@@ -425,7 +425,7 @@ Each step has its own automatic tests and its own commit. 🔌 marks a device ch
 | 8 | `kraken push` | `cli.py`, `notify.py` | Find → font sync → eject → notify; the `flock` lock and log (D34); `--dry-run` (D32) |
 | 🔌 A | Device test | | Starter catalogue (D33). Tick, push, font in menu; untick, push, gone; hand-added font survives; `.kraken/` not shown as books; does the Kobo need a restart to see new fonts? **Passed 2026-10-24** (no restart needed; see PLAN.md log) |
 | 9 | Auto-sync | `autosync.py` | Watcher (every 3 s), pushes **once per plug-in**; `kraken autosync on`/`off` writes the systemd unit |
-| 🔌 B | Device test | | Plug in, tap *Connect*: push, eject and notification happen by themselves |
+| 🔌 B | Device test | | Plug in, tap *Connect*: push, eject and notification happen by themselves. **Passed 2026-10-24** (see PLAN.md log) |
 
 ### Three questions for you (answered 2026-10-23: all recommended)
 

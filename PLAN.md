@@ -13,27 +13,29 @@ Updated at the end of every working session.*
 **Session 2026-10-24 (daytime).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
 account, Wi-Fi off, custom sleep screen. *Alice* is on the Kobo, so the sleep screen shows.
 
-This session: **Checkpoint A passed on the real Kobo** (results in the project log). It found one real
-problem: with no Italic file, the Kobo shows italic text in Bold, which would be confused with bold-start.
-Fixed by adding Atkinson's Italic and Bold Italic, plus a warning in `kraken fonts` (D36). Spike C samples
-are in `inbox/`, one for every R5 format. RTF left out (D35). 118 automatic tests pass.
+This session: **Milestone 1 is finished.** Checkpoint A passed (fonts install, verify, remove, and leave
+hand-added fonts alone). It found that the Kobo shows italic text in Bold when a family has no Italic: fixed
+with Atkinson's real italics and a warning (D36). Step 9, auto-sync, was built (D37–D42), and **Checkpoint B
+passed**. Spike C samples are in `inbox/`, one for every R5 format. RTF left out (D35). 140 automatic tests pass.
 
-The Kobo's `fonts/` folder now holds Atkinson Hyperlegible (all four styles, put there by kraken) and a
-hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand).
+The Kobo's `fonts/` folder holds Atkinson Hyperlegible (all four styles, put there by kraken) and a
+hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand). **Auto-sync is
+currently off** (switched off as the last Checkpoint B test); `kraken autosync on` switches it back on.
 
 **Next up, in order:**
 
-1. **Step 9, auto-sync** (`kraken autosync on`/`off`, the watcher, the systemd unit), then **Checkpoint B**.
-   That finishes Milestone 1. Then Milestone 2 (bold-start EPUBs), whose device test should also check that
-   bold-start uses the font's real Bold and stays distinct from italics. Release questions (Q11, Q12, snap)
+1. **Milestone 2, bold-start EPUBs** (`DESIGN.md` section 12): plan its steps first, for the owner to approve.
+   Its device test should also check that bold-start uses the font's real Bold and stays distinct from
+   italics. The two DRM-free EPUBs in `inbox/` can be its test books. Release questions (Q11, Q12, snap)
    wait (D23).
 2. **Spike C (converters):** write a short test plan for the owner to approve, then run it. Calibre and Pandoc
-   are installed; samples are described in the 2026-10-24 log entries.
+   are installed; samples are described in the 2026-10-24 log entries. Needed before Milestone 3.
 3. **Literata** (D33): download from its official source with the checksum and licence checked. It needs all
    four styles (D36).
 
-**Tip:** `kraken fonts` waits for typing, which the `!` prompt in Claude Code can't pass on. Run it in a
-normal terminal, or pipe the keys in (`printf '1\n\n' | .venv/bin/kraken fonts`).
+**Tips:** `kraken fonts` waits for typing, which the `!` prompt in Claude Code can't pass on: run it in a
+normal terminal, or pipe the keys in (`printf '1\n\n' | .venv/bin/kraken fonts`). Claude Code's permission
+check blocks Claude from switching on the background service, so the owner runs `kraken autosync on` / `off`.
 
 **Waiting on the owner:** nothing blocking. Unanswered: what the screen showed when the Kobo wouldn't power
 down before the second reset.
@@ -181,8 +183,8 @@ Each phase has a **definition of done**, the test of whether we can move on.
 | 1. Requirements ✅ | This document | You approve sections 3–5 (approved 2026-10-23) |
 | 2. Feasibility spikes | A ✅ bold-start on the Glo's screen; C: compare converters on real sample files for each format (B, KOReader, parked by D13) | Each risky unknown is answered "yes", "no" or "yes, but…" |
 | 3. Design ✅ | Folder layout, config file format, how the pipeline steps connect | Written design you understand and approve |
-| 4. Setup | git repo, public GitHub repo `Kobo-FOMO` (started early), Python project, tests | Empty but working project skeleton on GitHub |
-| 5. Build | One feature at a time (D17): font sync + auto-sync skeleton → bold-start → document conversion → pull → boot screen | Each feature tested on the Kobo before starting the next |
+| 4. Setup ✅ | git repo, public GitHub repo `Kobo-FOMO` (started early), Python project, tests | Empty but working project skeleton on GitHub |
+| 5. Build | One feature at a time (D17): font sync + auto-sync skeleton ✅ (Milestone 1, 2026-10-24) → bold-start → document conversion → pull → boot screen | Each feature tested on the Kobo before starting the next |
 | 6. Lock-down | Remove or block Kobo services, boot into KOReader | R1 verified: no Kobo traffic |
 | 7. Release | Build the snap, attach it to a GitHub release (R15), archive the repo (D20) | The snap installs on a clean Ubuntu and contains no personal files; repo archived |
 
@@ -389,3 +391,12 @@ A short diary of what actually happened, so future-us knows *why* things are the
   googlefonts repository, each checked against GitHub's own file hash), pushed all four, and the italics now
   lean. Added a warning for families with no Italic (D36). Not yet checked: bold-start using the real Bold,
   which needs Milestone 2's books.
+- **2026-10-24:** **Step 9 built** (`kraken autosync on`/`off`/status and the watcher; D37–D42), tested with a
+  pretend clock and a pretend `systemctl`, and checked by breaking six key lines on purpose. **Checkpoint B
+  passed:** with auto-sync on, plugging in and tapping Connect pushed, ejected and notified by itself, about a
+  second after the Kobo was mounted; plugging in again did it again. **The two risks didn't happen:** the eject
+  and the notification both work from the background service. With kraken's lock held (standing in for a long
+  `kraken pull`), the watcher stepped aside and left the Kobo connected; a push run by hand then worked. With
+  auto-sync off, plugging in did nothing. One fix: the service's journal stayed empty because Python holds
+  back printed lines when there's no terminal, so the unit file now sets `PYTHONUNBUFFERED=1`. **Milestone 1
+  is finished.**

@@ -111,6 +111,8 @@ Description=kraken auto-sync: push to the Kobo when it is plugged in
 
 [Service]
 ExecStart="{command}" autosync watch
+# Without this, Python holds printed lines back, and the service's journal stays empty.
+Environment=PYTHONUNBUFFERED=1
 Restart=on-failure
 RestartSec=10
 

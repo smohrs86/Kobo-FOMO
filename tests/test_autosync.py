@@ -153,6 +153,7 @@ def test_the_unit_file_runs_the_watcher_and_restarts_it():
     text = unit_text("/somewhere/.venv/bin/kraken")
     assert 'ExecStart="/somewhere/.venv/bin/kraken" autosync watch' in text
     assert "Restart=on-failure" in text
+    assert "Environment=PYTHONUNBUFFERED=1" in text  # so the journal shows kraken's messages
     assert "WantedBy=default.target" in text
 
 
