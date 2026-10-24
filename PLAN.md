@@ -75,6 +75,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D13 | Use **Kobo's built-in reader** (in Sideloaded Mode); KOReader is parked (P2) | After Sideloaded Mode (R1 ✅) and Spike A, the built-in reader does everything needed so far. "YAGNI": don't add complexity until it's needed |
 | D14 | *Pending Spike C:* choose the converter. Option 1: **Pandoc** for documents plus a PDF tool. Option 2: **Calibre** for everything | Decided by comparing real output on the Kobo, not by guessing |
 | D15 | Change only the boot **animation** frames (`/etc/images/kraken-on-*.raw.gz`), never the bootloader's first logo | Replacing animation images can't stop the Kobo from starting, and is easy to undo. The bootloader logo lives in a raw area where a mistake could brick the device |
+| D16 | The command-line tool is called **`kraken`** (`kraken push`, `kraken pull`) | *Kraken* is Kobo's real internal codename for the Glo (the firmware's boot images are `kraken-on-*.raw.gz`). Short, memorable, and true |
 
 ## 5. Architecture
 
@@ -91,8 +92,8 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
  └──────────────────────────────────────────┘        └───────────────┘
 ```
 
-- **Push:** plug in the Kobo, run `push`, unplug, read. Only adds and updates.
-- **Pull:** run `pull` and pick a document. It arrives in `Pulled/` with the bolding removed.
+- **Push:** plug in the Kobo, run `kraken push`, unplug, read. Only adds and updates.
+- **Pull:** run `kraken pull` and pick a document. It arrives in `Pulled/` with the bolding removed.
   (A PDF comes back as the EPUB it was converted into, not the original PDF.)
 - **Bold-start algorithm (first idea):** bold roughly the first 40–50% of each word's letters,
   with a strength setting we tune *on the device with your eyes*, not in theory.
@@ -163,6 +164,13 @@ Each phase has a **definition of done**, the test of whether we can move on.
   showing three loading dots. Format decoded from the firmware: **758 × 1024 portrait, 16-bit RGB565
   (little-endian), gzipped**. They'd be replaced via a `KoboRoot.tgz` containing only those images.
   The originals are in the firmware package, so it can be undone.
+
+**Spike D: custom sleep screen** (2026-10-23)
+
+- `spikes/screens/make_screen.py` builds a 758 × 1024, 16-grey sleep screen: a framed picture, a
+  bold-start title (30%, Atkinson Hyperlegible), an optional emoji (Noto Emoji, black and white), and a footer
+  where `**marked**` words are bold. Personal images and text are passed in at run time and stay in `personal/`.
+- Installed as `.kobo/screensaver/kraken.png`. **Pending:** confirm it shows on the Glo once the setting is on.
 
 ## 9. Parking lot (future ideas, not this project)
 

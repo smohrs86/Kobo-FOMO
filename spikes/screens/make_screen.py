@@ -10,7 +10,7 @@ so nothing personal is stored in this file. Example:
     python3 spikes/screens/make_screen.py \\
         --image personal/portrait.jpeg \\
         --title "My Custom E-Reader" --title "Line Two" \\
-        --emoji "🙂" --footer "Personal Assistive Reading Device" \\
+        --emoji "🙂" --footer "**MODEL** · Personal Assistive Reading Device" \\
         --out personal/sleep-screen.png
 """
 
@@ -90,6 +90,18 @@ def fit_writer(lines, emoji, max_size, max_width):
     raise ValueError("Title is too long to fit on the screen")
 
 
+def draw_marked_line(draw, y, text, size):
+    """Draw a centred line where **marked** pieces are bold (like Markdown)."""
+    regular = ImageFont.truetype(str(FONT_DIR / "AtkinsonHyperlegible-Regular.ttf"), size)
+    bold = ImageFont.truetype(str(FONT_DIR / "AtkinsonHyperlegible-Bold.ttf"), size)
+    # Splitting on "**" makes every second piece a bold one.
+    pieces = [(piece, bold if i % 2 else regular) for i, piece in enumerate(text.split("**")) if piece]
+    x = (WIDTH - sum(font.getlength(piece) for piece, font in pieces)) / 2
+    for piece, font in pieces:
+        draw.text((x, y), piece, font=font, fill=0)
+        x += font.getlength(piece)
+
+
 def crop_to_content(image, threshold=240, edge=0.01):
     """Trim the plain white border around the picture.
 
@@ -122,11 +134,11 @@ def build_screen(image_path, title_lines, emoji, footer):
         y += line_gap
     title_bottom = y
 
-    # Footer at the bottom, small and plain.
-    footer_font = ImageFont.truetype(str(FONT_DIR / "AtkinsonHyperlegible-Regular.ttf"), 22)
-    footer_y = HEIGHT - MARGIN - 22
+    # Footer at the bottom, small. Words wrapped in **double asterisks** are bold.
+    footer_size = 22
+    footer_y = HEIGHT - MARGIN - footer_size
     if footer:
-        draw.text((WIDTH / 2, footer_y), footer, font=footer_font, fill=0, anchor="mt")
+        draw_marked_line(draw, footer_y, footer, footer_size)
 
     # The picture fills the space between, keeping its shape.
     picture = crop_to_content(Image.open(image_path))
@@ -145,7 +157,7 @@ def main():
     parser.add_argument("--image", required=True, type=Path, help="framed picture for the middle")
     parser.add_argument("--title", action="append", required=True, help="a title line (repeat for more lines)")
     parser.add_argument("--emoji", default="", help="emoji to put at the end of the title")
-    parser.add_argument("--footer", default="", help="small text at the bottom")
+    parser.add_argument("--footer", default="", help="small text at the bottom; **marked** words are bold")
     parser.add_argument("--out", required=True, type=Path, help="where to save the PNG")
     args = parser.parse_args()
 
