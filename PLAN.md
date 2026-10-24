@@ -32,11 +32,13 @@ write-ahead manifest, `kraken fonts` and `kraken push` (with lock, log, eject, n
      eject works from kraken (`--no-user-interaction`); and the copy check reads back from the device.
 2. **Step 9, auto-sync** (`kraken autosync on`/`off`, the watcher, the systemd unit), then **Checkpoint B**.
    That finishes Milestone 1. Then Milestone 2 (bold-start EPUBs). Release questions (Q11, Q12, snap) wait (D23).
-3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
-   Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
+3. **Spike C (converters):** Calibre and Pandoc are both installed. **Samples are in `inbox/`** (see the
+   2026-10-24 log entry); only a Google Docs `.docx` is missing, and that's optional. Next: write a short
+   test plan for the owner to approve, then run it.
 
-**Waiting on the owner:** time with the Kobo for Checkpoint A; add sample documents to `inbox/` (a real PDF
-newsletter and an AI-written `.docx` are ideal). Unanswered: what the screen showed when the Kobo wouldn't
+**Update 2026-10-24:** the font catalogue now holds Atkinson Hyperlegible, ready for Checkpoint A.
+
+**Waiting on the owner:** time with the Kobo for Checkpoint A. Unanswered: what the screen showed when the Kobo wouldn't
 power down before the second reset.
 
 **How to run it:** `.venv/bin/kraken --help`; tests with `.venv/bin/pytest`.
@@ -89,6 +91,7 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
 - **News / RSS feeds.** (Decision D5.)
 - **Automatic two-way sync.** (Decision D6.)
 - **Scanned PDFs** (images of text). They would need OCR (text recognition); only PDFs with selectable text are supported.
+- **RTF documents** (`.rtf`). Not needed by the owner. (Decision D35.)
 - Games, the Kobo store, social features, cloud accounts.
 - Writing a reading app from scratch. (Decision D1.)
 
@@ -132,6 +135,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D32 | `kraken push --dry-run` is built **in Milestone 1** | The font sync plan is already worked out before anything is touched, so printing it is nearly free, and it's a safety net for the first push to the real Kobo |
 | D33 | Starter font catalogue: **Atkinson Hyperlegible** (sans-serif) and **Literata** (serif). Fonts are added to the catalogue by hand, together, with licences checked | Covers both kinds R11 asks for and keeps the first device test small. More families need no code changes. kraken itself never goes online (DESIGN.md section 8, rule 6) |
 | D34 | The lock and the log live in `~/.local/state/kraken/`. The lock uses **`flock`**, the operating system's file locking | If kraken crashes, the OS releases the lock by itself, so a stale "busy" lock can't get stuck |
+| D35 | **RTF (`.rtf`) is not supported**; R5's list stays as it is, and `.rtf` files go to `skipped/` | The owner doesn't receive RTF files. It's a 1987 Microsoft format, no longer developed since 2008 and replaced by `.docx`. Easy to add later if needed: Pandoc, Calibre and LibreOffice all read it |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -362,3 +366,9 @@ A short diary of what actually happened, so future-us knows *why* things are the
   can't make kraken's fonts look hand-added; deleting is refused outside `fonts/`; a read-only mount stops
   early. Safety tests were checked by breaking the code on purpose (mutation testing). New modules `push.py`
   and `lock.py`. Not yet run against the real Kobo: that's Checkpoint A.
+- **2026-10-24:** Font catalogue set up with **Atkinson Hyperlegible** (Regular, Bold, `OFL.txt`); kraken's
+  `read_catalogue()` reads it with no problems. Literata not added yet. The owner put Spike C samples in
+  `inbox/`: one article as `.md`, `.txt` and `.pdf`; an AI-written `.docx` (made with python-docx) and the
+  same text as `.odt` (made with Pandoc); three more text PDFs (a web page printed from a browser, a
+  page-layout booklet, a book); two DRM-free EPUBs. Still missing: a `.docx` exported from Google Docs
+  (optional). Decided not to support RTF (D35).
