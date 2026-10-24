@@ -27,7 +27,7 @@ The owner's own tool comes first, and the public snap release later (D23). **No 
 3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
 
-**Waiting on the owner:** confirm the updated sleep screen displays correctly; add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
+**Waiting on the owner:** add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
 
 ## 1. Vision
 
@@ -235,6 +235,9 @@ pushed through the plan on paper.*
 - ✅ **Works on the Glo (firmware 4.38).** It needs **both** settings under *Energy saving and privacy*:
   **"Show current read" ON** and **"Show book covers full screen" ON**. With "Show current read" off,
   the Kobo shows a blank "Sleeping" screen. PNG (greyscale) works; JPEG wasn't needed.
+- **It also needs a book in progress.** With no books on the Kobo, it showed "Sleeping" even with both
+  settings on; after opening a book, the graphic appeared (confirmed 2026-10-23 after the second reset).
+  The image takes the place of the current book's cover, so with no current read there is nothing to replace.
 - Only one image is kept in `.kobo/screensaver/`: with several, the Kobo picks one at random.
 
 ## 9. Parking lot (future ideas, not this project)
@@ -326,4 +329,5 @@ A short diary of what actually happened, so future-us knows *why* things are the
   firmware straight from its setup screen**, so the offline placeholder user isn't needed. Then
   `SideloadedMode=true` and the sleep screen were restored. Backups are in `backups/2026-10-23-after-second-factory-reset/`
   and `backups/2026-10-23-after-fw-4.38-second/`. **Recovery recipe:** reset → copy firmware → eject → wait →
-  Sideloaded Mode → restart → sleep screen + two Energy saving settings.
+  Sideloaded Mode → restart → sleep screen + two Energy saving settings → **open a book** (the sleep
+  graphic only shows when a book is in progress; see Spike D). Sleep screen confirmed working.
