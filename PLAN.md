@@ -11,7 +11,8 @@
 Updated at the end of every working session.*
 
 **Session ending 2026-10-23 (evening).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
-account, Wi-Fi off, and a custom sleep screen installed.
+account, Wi-Fi off, and a custom sleep screen installed. (Late evening: a second factory reset, recovered the
+same night; see the project log.)
 
 This session: a scenario walkthrough found gaps (section 8, Q7–Q12); decisions D19–D26 were made;
 `DESIGN.md` was written and **approved** (Phase 3 done); the README was polished, with bold-start examples.
@@ -39,7 +40,7 @@ It has no store, no Kobo account, and no bloat.
 | Item | Value |
 |---|---|
 | Model | Kobo Glo (N613, released 2012) |
-| Firmware | **2.1.5** (factory restore on 2026-10-23; previously 4.26.16704) |
+| Firmware | **4.38.23429**, installed by hand over USB (factory restores to 2.1.5 on 2026-10-23, twice) |
 | Screen | 6″ e-ink, 1024×758, touch, front light |
 | Storage | 2 GB internal (plus a microSD slot) |
 | Network | Wi-Fi (MAC recorded privately, not in this repo) |
@@ -319,3 +320,10 @@ A short diary of what actually happened, so future-us knows *why* things are the
   8-step pipeline, four commands, settings, engine rules, auto-sync via a systemd user service, tests, and
   milestones. The owner approved it with every recommendation (D24–D26): **Phase 3 done**. Added visual
   bold-start examples to the README (Alice, in four styles) and named ADHD there, the owner's choice.
+- **2026-10-23 (late):** The Kobo wouldn't power down, so the owner held the light button and slid the
+  power switch: a **second factory reset**, back to 2.1.5. Recovered with the firmware saved in `downloads/`
+  (checksums checked on the computer and again read back from the Kobo). **New finding: 2.1.5 installs
+  firmware straight from its setup screen**, so the offline placeholder user isn't needed. Then
+  `SideloadedMode=true` and the sleep screen were restored. Backups are in `backups/2026-10-23-after-second-factory-reset/`
+  and `backups/2026-10-23-after-fw-4.38-second/`. **Recovery recipe:** reset → copy firmware → eject → wait →
+  Sideloaded Mode → restart → sleep screen + two Energy saving settings.
