@@ -10,6 +10,9 @@ library/
 inbox/
 pulled/
 
+# Personal images (photos of the owner, custom sleep/boot screens): never publish
+personal/
+
 # Local-only settings and secrets
 *.local.*
 .env
