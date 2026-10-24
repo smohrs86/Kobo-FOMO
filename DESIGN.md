@@ -253,6 +253,8 @@ never have to edit system files by hand.
   least a Regular and a real Bold, plus its licence file. To start with, we download a starter set together,
   check each one's licence, and keep the separate **static** files (one file per weight), because Kobo's support
   for **variable** fonts (all weights in one file) is uncertain.
+  (Checkpoint A: a variable font did appear in the menu and display at its default weight; other weights
+  weren't tested.)
   Candidates: **Atkinson Hyperlegible** (already downloaded), **Literata** (designed for e-reading),
   **Lexend** (designed for reading ease), **Andika** (designed for clear letter shapes).
 - **Catalogue layout:** one folder per family, named as it appears in the checklist. Each file's style
@@ -406,7 +408,7 @@ Each step has its own automatic tests and its own commit. 🔌 marks a device ch
 | 6 | Apply the plan | `fonts.py` | Safe copy, then update the manifest |
 | 7 | `kraken fonts` | `cli.py` | The numbered checklist (D31); picks saved in kraken's data folder |
 | 8 | `kraken push` | `cli.py`, `notify.py` | Find → font sync → eject → notify; the `flock` lock and log (D34); `--dry-run` (D32) |
-| 🔌 A | Device test | | Starter catalogue (D33). Tick, push, font in menu; untick, push, gone; hand-added font survives; `.kraken/` not shown as books; does the Kobo need a restart to see new fonts? |
+| 🔌 A | Device test | | Starter catalogue (D33). Tick, push, font in menu; untick, push, gone; hand-added font survives; `.kraken/` not shown as books; does the Kobo need a restart to see new fonts? **Passed 2026-10-24** (no restart needed; see PLAN.md log) |
 | 9 | Auto-sync | `autosync.py` | Watcher (every 3 s), pushes **once per plug-in**; `kraken autosync on`/`off` writes the systemd unit |
 | 🔌 B | Device test | | Plug in, tap *Connect*: push, eject and notification happen by themselves |
 

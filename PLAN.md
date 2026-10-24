@@ -10,36 +10,33 @@
 *A handoff note, so any session (human or AI) can pick up where the last one stopped.
 Updated at the end of every working session.*
 
-**Session ending 2026-10-24 (just after midnight).** The device is working: firmware 4.38.23429, Sideloaded
-Mode, no Kobo account, Wi-Fi off, custom sleep screen. (A second factory reset on 2026-10-23 was recovered the
-same night; the recovery recipe is in the project log.) *Alice* is on the Kobo, so the sleep screen shows.
+**Session 2026-10-24 (daytime).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
+account, Wi-Fi off, custom sleep screen. *Alice* is on the Kobo, so the sleep screen shows.
 
-This session: the Kobo was recovered, **Phase 4 (Setup) was finished**, and **Milestone 1 steps 1–8 were
-built**: settings, finding the Kobo, safe copy, the font catalogue, the sync plan, applying it with a
-write-ahead manifest, `kraken fonts` and `kraken push` (with lock, log, eject, notify and `--dry-run`).
-116 automatic tests pass. Decisions D27–D34. **Nothing has been run against the real Kobo yet.**
+This session: **Checkpoint A passed on the real Kobo** (results in the project log). It found one real
+problem: with no Italic file, the Kobo shows italic text in Bold, which would be confused with bold-start.
+Fixed by adding Atkinson's Italic and Bold Italic, plus a warning in `kraken fonts` (D36). Spike C samples
+are in `inbox/`, one for every R5 format. RTF left out (D35). 118 automatic tests pass.
+
+The Kobo's `fonts/` folder now holds Atkinson Hyperlegible (all four styles, put there by kraken) and a
+hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand).
 
 **Next up, in order:**
 
-1. **Checkpoint A, on the real Kobo** (`DESIGN.md` section 12, Milestone 1 steps):
-   - Set up the starter catalogue in `~/.local/share/kraken/fonts/` (D33): one folder per family.
-     Atkinson Hyperlegible is in `downloads/fonts/` with its licence. **Literata** still needs downloading
-     from its official source, with the checksum and licence checked. Option: run the checkpoint with Atkinson
-     only, and add Literata afterwards.
-   - `kraken fonts` (tick) → `kraken push --dry-run` → `kraken push` → the font is in the Kobo's menu, and
-     bold-start text uses its real Bold. Then untick → push → it's gone. A hand-added font in `fonts/` survives.
-   - Check: the Kobo doesn't list `.kraken/` as books; whether it needs a restart to see new fonts; that the
-     eject works from kraken (`--no-user-interaction`); and the copy check reads back from the device.
-2. **Step 9, auto-sync** (`kraken autosync on`/`off`, the watcher, the systemd unit), then **Checkpoint B**.
-   That finishes Milestone 1. Then Milestone 2 (bold-start EPUBs). Release questions (Q11, Q12, snap) wait (D23).
-3. **Spike C (converters):** Calibre and Pandoc are both installed. **Samples are in `inbox/`** (see the
-   2026-10-24 log entry), one for every R5 format. Next: write a short test plan for the owner to approve,
-   then run it.
+1. **Step 9, auto-sync** (`kraken autosync on`/`off`, the watcher, the systemd unit), then **Checkpoint B**.
+   That finishes Milestone 1. Then Milestone 2 (bold-start EPUBs), whose device test should also check that
+   bold-start uses the font's real Bold and stays distinct from italics. Release questions (Q11, Q12, snap)
+   wait (D23).
+2. **Spike C (converters):** write a short test plan for the owner to approve, then run it. Calibre and Pandoc
+   are installed; samples are described in the 2026-10-24 log entries.
+3. **Literata** (D33): download from its official source with the checksum and licence checked. It needs all
+   four styles (D36).
 
-**Update 2026-10-24:** the font catalogue now holds Atkinson Hyperlegible, ready for Checkpoint A.
+**Tip:** `kraken fonts` waits for typing, which the `!` prompt in Claude Code can't pass on. Run it in a
+normal terminal, or pipe the keys in (`printf '1\n\n' | .venv/bin/kraken fonts`).
 
-**Waiting on the owner:** time with the Kobo for Checkpoint A. Unanswered: what the screen showed when the Kobo wouldn't
-power down before the second reset.
+**Waiting on the owner:** nothing blocking. Unanswered: what the screen showed when the Kobo wouldn't power
+down before the second reset.
 
 **How to run it:** `.venv/bin/kraken --help`; tests with `.venv/bin/pytest`.
 
@@ -376,3 +373,13 @@ A short diary of what actually happened, so future-us knows *why* things are the
   titles are plain paragraphs and converters won't see them as headings. It also has 43 Chinese characters,
   which tests what happens when a font (such as Atkinson) has no glyphs for them. Decided not to support
   RTF (D35).
+- **2026-10-24:** **Checkpoint A passed** on the real Kobo. `kraken fonts` → `push --dry-run` → `push`
+  installed Atkinson; the copies were byte-identical to the catalogue and matched the manifest's hashes. The
+  eject worked from kraken, and the desktop notification appeared. The Kobo listed the new font **without a
+  restart**, and `.kraken/` didn't appear as a book. Unticking and pushing removed only kraken's two files;
+  a hand-added font (`NotoEmoji-Regular.ttf`, a variable font) survived, and it also showed and displayed
+  in the Kobo's menu. **Found:** Atkinson with only Regular and Bold made Alice's italic words show as bold:
+  the Kobo falls back to the Bold file. Added Atkinson's Italic and Bold Italic (v1.006, from the official
+  googlefonts repository, each checked against GitHub's own file hash), pushed all four, and the italics now
+  lean. Added a warning for families with no Italic (D36). Not yet checked: bold-start using the real Bold,
+  which needs Milestone 2's books.
