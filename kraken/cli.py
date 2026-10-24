@@ -17,12 +17,14 @@ from kraken.settings import SettingsError, state_dir
 
 
 def font_checklist(families: list[str], missing: list[str], problems: list[str], picks: set[str],
+                   no_italic: set[str] = frozenset(),
                    ask: Callable[[str], str] | None = None, show: Callable[[str], None] | None = None) -> set[str]:
     """Show the numbered checklist until Enter is pressed, and return the ticked families.
 
     families: usable families in the catalogue
     missing:  ticked families that are no longer in the catalogue (shown so they can be unticked)
     problems: catalogue folders that can't be used, with the reason
+    no_italic: usable families with no Italic file, which get a warning (D36)
     `ask` and `show` default to input and print; tests pass pretend ones instead.
     """
     # Looked up now, not in the line above: a default there is fixed once, when Python first reads the file.
@@ -37,6 +39,8 @@ def font_checklist(families: list[str], missing: list[str], problems: list[str],
         for number, name in enumerate(choices, start=1):
             mark = "x" if name in ticked else " "
             note = "   (no longer in the catalogue)" if name in missing else ""
+            if name in no_italic:
+                note = "   (no Italic: the Kobo will show italic text as bold)"
             show(f"  {number}. [{mark}] {name}{note}")
         if problems:
             show("")
@@ -61,6 +65,7 @@ def run_fonts(args: argparse.Namespace) -> int:
     picks = read_picks()
     families = [family.name for family in catalogue.families]
     missing = sorted(picks - set(families))
+    no_italic = {family.name for family in catalogue.families if "Italic" not in family.styles}
 
     if not families and not missing:
         print(f"No usable fonts in the catalogue yet. Put each font family in its own folder in {catalogue_dir()}")
@@ -69,7 +74,7 @@ def run_fonts(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        new_picks = font_checklist(families, missing, catalogue.problems, picks)
+        new_picks = font_checklist(families, missing, catalogue.problems, picks, no_italic)
     except (KeyboardInterrupt, EOFError):  # Ctrl+C, or Ctrl+D
         print("\nNothing saved.")
         return 1

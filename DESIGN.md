@@ -259,7 +259,8 @@ never have to edit system files by hand.
   comes from the end of its name (`-Regular`, `-Bold`, `-Italic`, `-BoldItalic`); other weights are ignored.
   A family is left out, with the reason shown, if it has no Regular, no Bold, no licence file (a name
   starting `OFL`, `LICENSE` or `LICENCE`), two files for one style, or a "font" that isn't one (checked
-  by the file's first four bytes, which catches a web page saved by mistake).
+  by the file's first four bytes, which catches a web page saved by mistake). A family with no `-Italic`
+  is kept, but the checklist warns that the Kobo will show its italic text as bold (D36).
   ```
   ~/.local/share/kraken/fonts/
   ├── Atkinson Hyperlegible/   AtkinsonHyperlegible-Regular.ttf, AtkinsonHyperlegible-Bold.ttf, OFL.txt

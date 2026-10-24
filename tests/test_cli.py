@@ -31,9 +31,10 @@ def pretend_typing(*answers):
     return lambda prompt: next(typed)
 
 
-def run_checklist(*answers, families=("Atkinson Hyperlegible", "Literata"), missing=(), problems=(), picks=()):
+def run_checklist(*answers, families=("Atkinson Hyperlegible", "Literata"), missing=(), problems=(), picks=(),
+                  no_italic=()):
     screen = []
-    result = font_checklist(list(families), list(missing), list(problems), set(picks),
+    result = font_checklist(list(families), list(missing), list(problems), set(picks), set(no_italic),
                             ask=pretend_typing(*answers), show=screen.append)
     return result, "\n".join(screen)
 
@@ -73,6 +74,13 @@ def test_unusable_families_are_listed_with_the_reason():
     assert "Can't be used:\n  Noto Emoji: no Regular or Bold font" in screen
 
 
+def test_family_without_italic_is_warned_about_but_can_be_ticked():
+    result, screen = run_checklist("1", "", no_italic={"Atkinson Hyperlegible"})
+    assert "  1. [ ] Atkinson Hyperlegible   (no Italic: the Kobo will show italic text as bold)" in screen
+    assert "  2. [ ] Literata\n" in screen  # no warning for a family that has one
+    assert result == {"Atkinson Hyperlegible"}
+
+
 # --- kraken fonts, the whole command ---
 
 
@@ -88,6 +96,15 @@ def test_kraken_fonts_saves_the_picks(catalogue_with_two_families, monkeypatch, 
     assert main(["fonts"]) == 0
     assert read_picks() == {"Literata"}
     assert "Saved" in capsys.readouterr().out
+
+
+def test_kraken_fonts_warns_only_about_families_without_italic(catalogue_with_two_families, monkeypatch, capsys):
+    make_family(catalogue_dir(), "Lexend", ["Lexend-Regular.ttf", "Lexend-Bold.ttf", "Lexend-Italic.ttf"])
+    monkeypatch.setattr("builtins.input", pretend_typing(""))
+    main(["fonts"])
+    screen = capsys.readouterr().out
+    assert "Literata   (no Italic" in screen
+    assert "] Lexend\n" in screen  # listed, with no warning
 
 
 def test_ctrl_c_saves_nothing(catalogue_with_two_families, monkeypatch, capsys):
