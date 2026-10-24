@@ -18,13 +18,14 @@ account, Wi-Fi off, and a custom sleep screen installed.
 1. **Phase 3, Design:** write `DESIGN.md` for the `kraken` tool (commands, folders, settings file,
    code layout `boldstart/` + `kraken/`, auto-sync on plug-in, tests). Review and approve it before any code.
    - Open question: the `kraken fonts` picker as a **terminal checklist** (recommended) or a window?
+   - Must answer the walkthrough questions Q7–Q11 (section 8) and fit the snap release (R15, D20).
 2. **Phase 5, Build:** walking skeleton first (D17): font sync + auto-sync, then bold-start,
    then document conversion, then pull, then the boot screen (R13).
 3. **Spike C (converters):** Calibre and Pandoc are both installed. It needs sample files (one each:
    Google Doc as `.docx`, `.docx`, `.odt`, text `.pdf`, `.txt`, `.md`) in `inbox/`.
 
 **Waiting on the owner:** confirm the updated sleep screen displays correctly; answer the picker
-question; add sample documents to `inbox/`.
+question and Q7; add sample documents to `inbox/` (a real PDF newsletter and an AI-written `.docx` are ideal).
 
 ## 1. Vision
 
@@ -53,7 +54,7 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
 |---|---|---|
 | R1 | No Kobo store, no Kobo account, no contact with Kobo servers | Must |
 | R2 | Read my own EPUB files | Must |
-| R3 | **Bold-start lettering** (bionic-style) on everything I read, to help with Irlen syndrome | **Must** |
+| R3 | **Bold-start lettering** (bionic-style) on everything I read, to help with Irlen syndrome. Exception: PDFs that don't convert cleanly are sent as-is (D21) | **Must** |
 | R4 | ~~Themed reading styles~~ | Removed (2026-10-23): not needed; the Glo's built-in settings are enough |
 | R5 | Documents in these formats can be put on the reader: Google Docs (downloaded as `.docx`), Word `.docx`, LibreOffice/OpenOffice `.odt`, text-based `.pdf`, `.txt`, Markdown `.md` | Should |
 | R6 | ~~News feeds by region and topic search~~ | Removed (D5) |
@@ -65,6 +66,7 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
 | R12 | **Custom sleep screen:** our own graphic when the Kobo is asleep or powered off ✅ (sleep) | Should |
 | R13 | **Custom power-on screen:** our own graphic in the boot animation | Could |
 | R14 | **Auto-sync on plug-in:** when the Kobo is connected (after tapping *Connect*), `kraken push` runs by itself, ejects the Kobo safely, and shows a desktop notification | Should |
+| R15 | **Release:** kraken is released as a **snap** on the repo's GitHub Releases page. It contains only the tool: no personal graphics, settings or books (D20) | Should |
 
 ### Out of scope (deliberately not doing)
 
@@ -96,11 +98,14 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D11 | GitHub repo is **public** (GPL-3.0), not private | It's a portfolio piece showing how AI can support accessibility. Nothing personal is ever committed (see `CLAUDE.md`, Privacy) |
 | D12 | Every EPUB the pipeline outputs **must include an EPUB 2 `toc.ncx`** (adding one if the source book lacks it), and is checked automatically before it's copied | Spike A proved a missing `toc.ncx` freezes Kobo's Adobe-based reader when settings change |
 | D13 | Use **Kobo's built-in reader** (in Sideloaded Mode); KOReader is parked (P2) | After Sideloaded Mode (R1 ✅) and Spike A, the built-in reader does everything needed so far. "YAGNI": don't add complexity until it's needed |
-| D14 | *Pending Spike C:* choose the converter. Option 1: **Pandoc** for documents plus a PDF tool. Option 2: **Calibre** for everything. (Both installed 2026-10-23) | Decided by comparing real output on the Kobo, not by guessing |
+| D14 | *Pending Spike C:* choose the converter. Option 1: **Pandoc** for documents plus a PDF tool. Option 2: **Calibre** for everything. (Both installed 2026-10-23) | Decided by comparing real output on the Kobo, not by guessing. Since D20, also judged on how easily it fits inside a snap (Calibre is large; Pandoc can't read PDFs) |
 | D15 | Change only the boot **animation** frames (`/etc/images/kraken-on-*.raw.gz`), never the bootloader's first logo | Replacing animation images can't stop the Kobo from starting, and is easy to undo. The bootloader logo lives in a raw area where a mistake could brick the device |
 | D16 | The command-line tool is called **`kraken`** (`kraken push`, `kraken pull`) | *Kraken* is Kobo's real internal codename for the Glo (the firmware's boot images are `kraken-on-*.raw.gz`). Short, memorable, and true |
 | D17 | **Build order: "walking skeleton" first.** kraken's first feature is font sync (R11), which proves the core plumbing (find Kobo → copy → verify → eject → notify) before book conversion is added | Fonts need all the plumbing but none of the hard conversion work, so the riskiest *infrastructure* gets tested early on something simple |
 | D18 | kraken **only removes files it installed itself** (tracked in a manifest), and never removes books (R8) | Un-picking a font should remove it, but kraken must never touch anything it didn't put there |
+| D19 | Files to read are **moved by hand into a `KRAKEN` folder** in the home folder, outside the code repo. kraken never looks in Downloads | Only what you choose gets sent. Keeps personal books out of the public repo and out of the released snap |
+| D20 | **End state:** once kraken works, it is released once as a snap file on GitHub Releases (R15), then the repo is **archived** (made read-only) and development stops. The owner keeps running kraken locally | The goal is a finished tool, not an ongoing service. Archiving tells visitors the project is complete |
+| D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
 
@@ -144,6 +149,7 @@ Each phase has a **definition of done**, the test of whether we can move on.
 | 4. Setup | git repo, public GitHub repo `Kobo-FOMO` (started early), Python project, tests | Empty but working project skeleton on GitHub |
 | 5. Build | One feature at a time (D17): font sync + auto-sync skeleton → bold-start → document conversion → pull → boot screen | Each feature tested on the Kobo before starting the next |
 | 6. Lock-down | Remove or block Kobo services, boot into KOReader | R1 verified: no Kobo traffic |
+| 7. Release | Build the snap, attach it to a GitHub release (R15), archive the repo (D20) | The snap installs on a clean Ubuntu and contains no personal files; repo archived |
 
 ## 7. Risks
 
@@ -153,7 +159,9 @@ Each phase has a **definition of done**, the test of whether we can move on.
 | A Kobo firmware update undoes our setup | **High (happened 2026-10-23)** | **No Wi-Fi** until lock-down is done. Never sign in to Kobo; block update servers. Any firmware change is done manually, by choice |
 | Bad USB cable or port | Medium (happened 2026-10-23) | Use the known-good cable and port; suspect the cable first when USB misbehaves |
 | Bold-start text looks bad on e-ink or a slow processor | Medium | Phase 2 spike tests it on the real screen before we build anything |
-| PDF → EPUB conversion is messy | Medium | Accept "good enough" for text PDFs; leave complex PDFs as PDF |
+| PDF → EPUB conversion is messy | Medium | The PDF ladder (D21): convert if clean, otherwise send as-is, skip scanned or locked PDFs |
+| Snap restrictions block USB access, auto-sync or notifications | Medium | Package the walking skeleton (D17) as a snap early, so problems show up on something simple |
+| Personal files leak into the released snap | Medium | Build the snap from a fresh `git clone`, never the working folder (which holds git-ignored personal files), and list the snap's contents before release |
 | Bold-start isn't scientifically proven to help | Low | What matters is whether it helps *you*, so we test it with you |
 
 ## 8. Open questions
@@ -162,6 +170,22 @@ Each phase has a **definition of done**, the test of whether we can move on.
 - ~~Q4. Sync and deletion~~: closed by R8, R10 and D6.
 - ~~Q5. GitHub repository~~: `Kobo-FOMO`, public (D11).
 - ~~Q6. Firmware~~: closed by D10.
+
+*From the scenario walkthrough (2026-10-23): a Gutenberg EPUB, a PDF newsletter and an AI-written `.docx`
+pushed through the plan on paper.*
+
+- **Q7. After a file is sent, does it stay in `KRAKEN/`** (a library) or move to a "sent" folder (an inbox)?
+- **Q8. Push record.** Without one, a book you delete on the Kobo looks "new" and is re-sent on the next
+  plug-in. Proposal: kraken remembers each file it sent plus a hash (a fingerprint of its contents), and only
+  sends files that are new or whose hash changed. Changing the bold strength re-sends nothing unless you run
+  `kraken push --rebuild`.
+- **Q9. Design details:** a document's title when its metadata has none (proposal: its own title, else first
+  heading, else filename); text bold-start skips (proposal: headings, code, web addresses); one bad file must not
+  stop the others, and the notification sums up what was sent and skipped; destination folder on the Kobo;
+  `.epub` or `.kepub.epub`; tell users to download Gutenberg's EPUB, not its `.txt` (hard line breaks).
+- **Q10. Device test:** does re-sending an updated file keep the reading position?
+- **Q11. Should kraken be fully offline?** A snap that doesn't ask for network permission *cannot* go online,
+  which would enforce R1 for kraken itself. Fonts (R11) would then be bundled inside the snap.
 
 ## 8b. Spike results
 
@@ -208,19 +232,24 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
   engine (D8), which is why that engine is built as a separate library from day one.
 - **P2. KOReader**, if Kobo's built-in reader ever proves not to be enough. See D13.
 - **P3. Automatic Google Drive sync**, instead of downloading Google Docs as `.docx` by hand.
+- **P4. Generated covers** for converted documents (which otherwise show as plain tiles), reusing the
+  Spike D screen code.
 
 ## 10. Glossary
 
 | Term | Meaning |
 |---|---|
 | ADR | Architecture Decision Record: a written note of a decision and why it was made |
+| Archive (GitHub) | Marking a repository read-only: still public and downloadable, but finished |
 | Brick | To leave a device unable to start, "as useful as a brick" |
 | Conflict (sync) | When the same file changed in two places and a program must guess which one wins |
 | DRM | Digital Rights Management: a lock on a file that controls who can open it |
 | EPUB | The standard ebook file format; inside, it's basically a small website in a zip file |
 | Feasibility spike | A small throwaway experiment to answer "can this even work?" |
+| Hash | A short "fingerprint" computed from a file's contents; change one letter and the hash changes |
 | KOReader | Open-source reading app for e-readers |
 | Library (code) | Reusable code that other programs build on; it isn't a program by itself |
+| Metadata | Information stored *about* a file inside it, such as a book's title and author |
 | MoSCoW | Prioritising as Must / Should / Could / Won't |
 | Nickel | Kobo's own reading software |
 | Parking lot | A list of good ideas deliberately held for later |
@@ -228,7 +257,9 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
 | Push / Pull | Sending files *to* a place / fetching files *from* a place |
 | Scope | What a project will and won't do |
 | Separation of concerns | Splitting code so each part has one job and doesn't depend on unrelated parts |
+| Scenario walkthrough | Pushing a pretend real-life case through a design on paper to find gaps before coding |
 | Snap | Ubuntu's app package format, installed with `snap install` |
+| Snap confinement | The walls around a snap: it can only reach what it declares (USB drives, network, notifications) |
 | Source of truth | The one place whose copy wins if two copies disagree |
 
 ## 11. Project log
@@ -259,3 +290,6 @@ A short diary of what actually happened, so future-us knows *why* things are the
 - **2026-10-23:** Spike D: custom sleep screen built (`spikes/screens/make_screen.py`) and working (needs
   "Show current read" + "Show book covers full screen" ON). Boot animation format decoded. Tool named
   `kraken` (D16). Planned font picker, auto-sync on plug-in (R14) and the walking-skeleton build order (D17).
+- **2026-10-23:** Scenario walkthrough: a Gutenberg EPUB, a PDF newsletter and an AI-written `.docx`.
+  Biggest find: without a push record, books deleted on the Kobo would be re-sent (Q8). Decided the `KRAKEN`
+  folder (D19), the end state of a snap release and then an archived repo (R15, D20), and the PDF ladder (D21).
