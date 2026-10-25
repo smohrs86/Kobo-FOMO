@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C partly passed, failed on speed (big bolded files); Spike E built, waiting for the Kobo test.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C partly passed, failed on speed (big bolded files); Spike E books on the Kobo, waiting for the test.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-24
 
@@ -21,13 +21,14 @@ jump in Yarrow **crashed** the reader. Cause, very likely: bolding makes chapter
 change without a freeze in the real books, a deleted book not coming back, a re-dropped book replacing its copy.
 
 On the Kobo: *Alice*, the two test books in `kraken/`, and the throwaway strength test in `kraken-tests/`
-(delete by hand when done). `~/KRAKEN/sent/` holds the two originals. Auto-sync is **on**.
+(delete by hand when done), plus Spike E's five books (E1–E5) in `kraken-tests/`. `~/KRAKEN/sent/` holds the
+two originals. Auto-sync is **off** (turned off to send the spike books): the owner turns it back on with
+`kraken autosync on`.
 
 **Next up, in order:**
 
-1. **Spike E (big files): test on the Kobo.** The plan is approved and the five books are built
-   (section 8b). Next: plug in the Kobo, run `make_variants.py … --send`, then the owner follows the test
-   steps in section 8b and fills in the table. Then decide the fix from the results.
+1. **Spike E (big files): test on the Kobo.** The five books are on the Kobo in `kraken-tests/`. The owner
+   follows the test steps in section 8b and fills in the table. Then decide the fix from the results.
 2. Build the fix as Milestone 2 step 7, then **finish Checkpoint C** (re-send, speed, font change, delete,
    re-drop) and mark Milestone 2 done.
 3. **Spike C (converters)**, then **Literata** (D33), as before.
@@ -508,3 +509,7 @@ A short diary of what actually happened, so future-us knows *why* things are the
   about the Kobo's memory: no setting exists for it, and swap would need system changes, so a restart check was
   added instead. `spikes/big-files/make_variants.py` builds E1–E5 (results table in section 8b); every version
   passes `check_bolded`. Waiting for the Kobo test.
+- **2026-10-24:** **Spike E books sent.** The first try failed: auto-sync ran a push on plug-in and ejected
+  the Kobo (D26) before the books could be copied, even with nothing to send. With auto-sync off, all five
+  books went to `kraken-tests/` with kraken's safe copy, and the Kobo was ejected. To think about later:
+  auto-sync always ejects, so any manual job on the Kobo means turning it off first.
