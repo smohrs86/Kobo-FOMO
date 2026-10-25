@@ -44,14 +44,14 @@ its "Next up" list. **Ending a session:** update section 0 and the project log, 
 
 ## Device safety rules
 
-- **Never let the Kobo onto Wi-Fi.** On 2026-10-23 it auto-updated over Wi-Fi, was
+- **Never let the Kobo onto Wi-Fi** (D56). On 2026-10-23 it auto-updated over Wi-Fi, was
   interrupted, and boot-looped. Firmware changes are done manually over USB, by choice.
 - **Back up any file on the Kobo before editing it** (to `backups/`, which is git-ignored).
 - **Verify downloads with their checksum** before copying them to the device.
 - **During a firmware update, a black or striped screen means wait.** Never power off.
 - Eject safely (`udisksctl unmount` then `udisksctl power-off`), then the user unplugs.
   The Kobo stays on its "connected" screen until the cable is physically removed.
-- If USB misbehaves, suspect the cable first.
+- If USB misbehaves, suspect the cable first (and the magnetic adapter, if one is in use; D56).
 - The Kobo reads `.kobo/Kobo/Kobo eReader.conf` **only at startup**: restart it after editing.
 - The device runs firmware 4.38.23429 in **Sideloaded Mode** (`SideloadedMode=true`), with no Kobo account.
 - The Kobo mounts at `/run/media/$USER/KOBOeReader`; device files live in `.kobo/`.
