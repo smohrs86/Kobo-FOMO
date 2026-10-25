@@ -156,6 +156,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D53 | The note beside a file in `skipped/` is named `<file name>.why.txt`, and says what happened, when, and how to try again. Book names that differ **only in capitals** (`Alice.epub`, `alice.epub`) clash, like D51's replaced characters; `sent/` keeps one original per name on the Kobo | Chosen while building step 5 (the design didn't name the note). The Kobo's FAT drive treats upper and lower case as the same name, so two such books would overwrite each other |
 | D54 | A Kobo-format book (`Alice.kepub.epub`) loses its `.kepub` on the Kobo: `kraken/Alice.epub` | The Kobo reads a `.kepub.epub` with its own Kobo-format reader, but kraken's bolded copy is a plain EPUB (`DESIGN.md` section 1). The owner chose this on 2026-10-24 |
 | D55 | Default bold-start **strength is 0.45** (Medium), up from Spike A's 0.30 | At Checkpoint C the owner compared 30/40/45/50/60% on the Glo (one test book, same text at each strength) and liked anything from 30% to 60%, depending on the font and size. 45% sits in the middle. How to vary it is open (Q13) |
+| D56 | **No Wi-Fi sync: books go over USB only.** To spare the Kobo's micro-USB socket, use a **data-capable magnetic adapter** that stays in the socket while the cable snaps on and off | The owner worried that frequent plugging would wear out the socket. The socket is rated for about 10,000 plug-ins, and the parts that wear are in the cable. Wi-Fi would break R1 and risk another auto-update, and Kobo's built-in reader can't receive files over Wi-Fi without a Kobo account, firmware mods or KOReader. Even an offline hotspot (the safest version) wouldn't spare the socket, because the Kobo still charges through it |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -208,7 +209,7 @@ Each phase has a **definition of done**, the test of whether we can move on.
 |---|---|---|
 | Bricking the Kobo | Medium (accepted, D9) | Copy any file before editing it; factory reset as recovery. The Glo's OS lives on an internal microSD card that could be re-imaged as a last resort |
 | A Kobo firmware update undoes our setup | **High (happened 2026-10-23)** | **No Wi-Fi** until lock-down is done. Never sign in to Kobo; block update servers. Any firmware change is done manually, by choice |
-| Bad USB cable or port | Medium (happened 2026-10-23) | Use the known-good cable and port; suspect the cable first when USB misbehaves |
+| Bad USB cable or port, or a worn micro-USB socket | Medium (cable failed 2026-10-23) | Use the known-good cable and port; suspect the cable first when USB misbehaves. A data-capable magnetic adapter spares the socket (D56) |
 | Bold-start text looks bad on e-ink or a slow processor | Medium | Phase 2 spike tests it on the real screen before we build anything |
 | PDF → EPUB conversion is messy | Medium | The PDF ladder (D21): convert if clean, otherwise send as-is, skip scanned or locked PDFs |
 | Snap restrictions block USB access, auto-sync or notifications | Medium | Deferred by D23. When release work starts, package the simplest feature first, so problems show up on something small |
@@ -338,6 +339,7 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
 - **P3. Automatic Google Drive sync**, instead of downloading Google Docs as `.docx` by hand.
 - **P4. Generated covers** for converted documents (which otherwise show as plain tiles), reusing the
   Spike D screen code.
+- **P5. Our own operating system for the Glo**, after this project is finished. First make a full image of the internal microSD card (the backup), then experiment only on a copy. Lighter ways in: an app that runs on Kobo's Linux in place of Nickel, as KOReader and Plato do. The hard part of a full OS: the e-ink display driver and its waveform files, and support for the Glo's i.MX50 chip in current Linux, which needs research.
 
 ## 10. Glossary
 
@@ -513,3 +515,4 @@ A short diary of what actually happened, so future-us knows *why* things are the
   the Kobo (D26) before the books could be copied, even with nothing to send. With auto-sync off, all five
   books went to `kraken-tests/` with kraken's safe copy, and the Kobo was ejected. To think about later:
   auto-sync always ejects, so any manual job on the Kobo means turning it off first.
+- **2026-10-24:** The owner worried that plugging in so often would wear out the Kobo's micro-USB socket, and asked about Wi-Fi sync, then about blocking Kobo's servers. **D56:** no Wi-Fi; a data-capable magnetic adapter spares the socket instead. Building our own OS for the Glo parked as P5.
