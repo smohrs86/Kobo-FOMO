@@ -15,8 +15,8 @@ DEFAULT_SETTINGS_TEXT = """\
 # kraken settings. Lines starting with # are notes and are ignored.
 
 [boldstart]
-# Fraction of each word's letters in bold. 0.30 = Light, your pick from Spike A.
-strength = 0.30
+# Fraction of each word's letters in bold. 0.45 = Medium, picked at Checkpoint C (D55).
+strength = 0.45
 
 [folders]
 inbox = "~/KRAKEN"

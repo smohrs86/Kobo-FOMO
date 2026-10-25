@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C (on the real Kobo) next.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C partly passed, failed on speed (big bolded files); Spike E next.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-24
 
@@ -10,34 +10,28 @@
 *A handoff note, so any session (human or AI) can pick up where the last one stopped.
 Updated at the end of every working session.*
 
-**Session 2026-10-24 (daytime, ended for a context refresh).** The device is working: firmware 4.38.23429, Sideloaded Mode, no Kobo
-account, Wi-Fi off, custom sleep screen. *Alice* is on the Kobo, so the sleep screen shows.
+**Session 2026-10-24 (afternoon, Checkpoint C).** The device is working: firmware 4.38.23429, Sideloaded Mode,
+no Kobo account, Wi-Fi off, custom sleep screen. Milestone 1 is done; Milestone 2 steps 1–6 are built (267 tests).
 
-This session: **Milestone 1 is finished** (Checkpoints A and B passed; D35–D42). **Milestone 2 was planned
-(D43–D52, steps in `DESIGN.md` section 12) and steps 1–3 are built:** the whole bold-start engine,
-`boldstart/text.py`, `page.py` and `epub.py`, with `bold_epub` and `unbold_epub`. Every page of three real
-books bolds once per word and round-trips. Steps 4–6 are built too (`kraken/checks.py`, `kraken/inbox.py`, books
-in `kraken push`), so **`kraken push` now sends bold-start books**; 267 automatic tests pass.
-New working rule: a **💾 savepoint** (docs, commit, push) after every finished step, so a `/compact` or
-restart never loses decisions (see `CLAUDE.md`, "How we work").
+**Checkpoint C so far:** ✅ two books sent by auto-sync and filed in `sent/`; ✅ real titles; ✅ 45% (D55);
+✅ real headings plain (Watts's headings are styled paragraphs, so they *are* bolded); ✅ italics stay italic.
+❌ **Speed:** bolded books are slow to jump to (TOC, page jump: 20–30 s), Yarrow's page turns are slow, and a TOC
+jump in Yarrow **crashed** the reader. Cause, very likely: bolding makes chapter files about 5× bigger (Yarrow:
+76 → 391 KB per file), past the ~260–300 KB the built-in (Adobe) reader handles well. Not yet tested: font
+change without a freeze in the real books, a deleted book not coming back, a re-dropped book replacing its copy.
 
-The Kobo's `fonts/` folder holds Atkinson Hyperlegible (all four styles, put there by kraken) and a
-hand-added `NotoEmoji-Regular.ttf` (a test font; it can stay or be deleted by hand). **Auto-sync is on**:
-plugging in and tapping Connect is all it takes. `kraken autosync off` stops it. **Now that step 6 is built,
-auto-sync sends any `.epub` waiting in `~/KRAKEN/` on the next plug-in.** `~/KRAKEN/` doesn't exist yet; the
-first push makes it.
+On the Kobo: *Alice*, the two test books in `kraken/`, and the throwaway strength test in `kraken-tests/`
+(delete by hand when done). `~/KRAKEN/sent/` holds the two originals. Auto-sync is **on**.
 
 **Next up, in order:**
 
-1. **Checkpoint C** on the real Kobo (the checklist is in `DESIGN.md` section 12). Steps:
-   - Optional first: preview a bolded book in Calibre's viewer (`ebook-viewer <file>`), made with `bold_epub`.
-   - Copy the two test EPUBs from the local `inbox/` folder into `~/KRAKEN/`, run `kraken push --dry-run` with
-     the Kobo plugged in, then plug in for real (auto-sync) and go through the checklist.
-   - Afterwards, record the results in the log and mark Milestone 2 done.
-2. **Spike C (converters):** write a short test plan for the owner to approve, then run it. Calibre and Pandoc
-   are installed; samples are described in the 2026-10-24 log entries. Needed before Milestone 3.
-3. **Literata** (D33): download from its official source with the checksum and licence checked. It needs all
-   four styles (D36).
+1. **Spike E (big files):** write a short plan for the owner to approve, then run it. Idea: four versions of
+   Yarrow (not bolded, bolded as now, a shorter marker such as `<b class="k">`, split into smaller files),
+   each tried with a TOC jump on the Kobo. Tells us whether size is the cause and which fix is enough.
+2. Build the fix as Milestone 2 step 7, then **finish Checkpoint C** (re-send, speed, font change, delete,
+   re-drop) and mark Milestone 2 done.
+3. **Spike C (converters)**, then **Literata** (D33), as before.
+4. After Milestone 2: decide Q13 (strength that varies) and Q14 (a GUI?).
 
 **Tips:** `kraken fonts` waits for typing, which the `!` prompt in Claude Code can't pass on: run it in a
 normal terminal, or pipe the keys in (`printf '1\n\n' | .venv/bin/kraken fonts`). Claude Code's permission
@@ -160,6 +154,7 @@ Each decision is recorded with *why* it was made, so we don't relitigate it late
 | D52 | The bolded copy is built in a **temporary folder** and deleted after copying; `sent/` keeps only the original | The original is what `--rebuild` and `pull` work from; a second copy wastes space |
 | D53 | The note beside a file in `skipped/` is named `<file name>.why.txt`, and says what happened, when, and how to try again. Book names that differ **only in capitals** (`Alice.epub`, `alice.epub`) clash, like D51's replaced characters; `sent/` keeps one original per name on the Kobo | Chosen while building step 5 (the design didn't name the note). The Kobo's FAT drive treats upper and lower case as the same name, so two such books would overwrite each other |
 | D54 | A Kobo-format book (`Alice.kepub.epub`) loses its `.kepub` on the Kobo: `kraken/Alice.epub` | The Kobo reads a `.kepub.epub` with its own Kobo-format reader, but kraken's bolded copy is a plain EPUB (`DESIGN.md` section 1). The owner chose this on 2026-10-24 |
+| D55 | Default bold-start **strength is 0.45** (Medium), up from Spike A's 0.30 | At Checkpoint C the owner compared 30/40/45/50/60% on the Glo (one test book, same text at each strength) and liked anything from 30% to 60%, depending on the font and size. 45% sits in the middle. How to vary it is open (Q13) |
 | D21 | **PDF ladder:** (1) a text PDF becomes an EPUB with bold-start; (2) if the converted layout is poor, the original PDF is sent as-is, readable but without bold-start; (3) scanned or locked PDFs are skipped, with a message saying why. Whole classes of PDF may be dropped | Newsletters are usually text-based PDFs made to be machine-readable. Reading something without bold-start beats not reading it, and clever layout detection isn't worth building. How step 2 is chosen: `DESIGN.md` |
 
 ## 5. Architecture
@@ -247,6 +242,14 @@ pushed through the plan on paper.*
   and bold-start produce standard EPUBs that any EPUB reader can open. Pushing and fonts should work on any Kobo,
   the sleep screen on recent firmware, but the boot screen (R13) is Glo-only and the riskiest feature. Only the
   Glo can be tested here.
+- **Q13. Strength that varies with font and size.** The bolding is baked into the book when it's sent, and Kobo's
+  built-in reader can't change it. Options: (a) one default, changed with `--rebuild` (Milestone 5); (b) a strength
+  per book, for example a `~/KRAKEN/60/` folder; (c) change it on the Kobo, which needs KOReader style tweaks
+  (reopens D13 and P2; needs a spike). Decide after Milestone 2.
+- **Q14. A window (GUI) for kraken?** D25 chose terminal commands; the owner asked on 2026-10-24 whether there
+  will be a UI to manage fonts, bold-start options and the kraken folders. Today: `kraken fonts`, `settings.toml`
+  in a text editor, and `~/KRAKEN/` in the file manager. A GUI would be a new requirement, designed first.
+  Decide after Milestone 2.
 
 ## 8b. Spike results
 
@@ -450,3 +453,17 @@ A short diary of what actually happened, so future-us knows *why* things are the
   terminal names every waiting file and why. `--dry-run` checks each book and says "would send" or "would
   skip", without bolding or creating anything. Breaking key lines on purpose found three gaps in the tests
   (the toc check, the bolded-copy check, and a broken page), now covered. 267 tests pass.
+- **2026-10-24:** **Checkpoint C started.** Preview in Calibre's viewer: *Mortuary Customs* shows bold-start, and no
+  heading (`<h1>`–`<h6>`) is bolded. Some books write titles as plain paragraphs (Watts: `<p class="h2c1">`); those
+  *are* bolded. **Strength re-test:** a throwaway test book (not in the repo) held the same Watts excerpt at 30, 40,
+  45, 50 and 60%, made with the real engine, and was put in `kraken-tests/` on the Kobo with kraken's safe copy.
+  The owner changed fonts and sizes without a freeze, and liked 30% to 60% depending on font and size. **D55:**
+  default 0.45. Open: Q13 (varying strength), Q14 (a GUI). `kraken push --dry-run` on the real Kobo listed both
+  test books correctly.
+- **2026-10-24:** **Checkpoint C on the Kobo.** Auto-sync sent both books (notification "2 books sent, safe to
+  unplug"); titles, 45%, plain headings in Yarrow and italics all good. **Failed on speed:** TOC and page jumps
+  take 20–30 s in the bolded books, Yarrow's page turns are slow, and one TOC jump in Yarrow crashed the reader.
+  The unbolded *Alice* is fast (after a slow first open, which is normal: the reader counts pages). Measured:
+  bolding makes each chapter file about 5× bigger, because every word gains `<b class="kraken-bs">…</b>`.
+  Yarrow's files grow from 76 to 391 KB, past the ~260–300 KB that the Adobe engine handles well (Calibre
+  splits EPUB files over 260 KB for this reason). Spike E will test a shorter marker and split files.

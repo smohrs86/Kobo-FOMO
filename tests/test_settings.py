@@ -45,7 +45,7 @@ def test_first_run_creates_settings_file_with_defaults(pretend_home):
 
     created = pretend_home / ".config" / "kraken" / "settings.toml"
     assert created.read_text() == DEFAULT_SETTINGS_TEXT
-    assert settings.strength == 0.30
+    assert settings.strength == 0.45
     assert settings.inbox == pretend_home / "KRAKEN"
     assert settings.eject_after_push is True
     assert settings.notify is True
@@ -71,7 +71,7 @@ def test_missing_settings_fall_back_to_defaults(pretend_home):
     write_settings(pretend_home, "[autosync]\nnotify = false\n")
     settings = load_settings()
     assert settings.notify is False
-    assert settings.strength == 0.30
+    assert settings.strength == 0.45
 
 
 def test_whole_number_strength_is_allowed(pretend_home):

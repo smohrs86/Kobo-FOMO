@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repository.
 
 Kobo-FOMO turns an old **Kobo Glo** (N613, 2012) into a distraction-free reader with
 **bold-start lettering** (bionic-style reading) as an accessibility accommodation.
-**KOReader** is the reading app (it replaces Kobo's own interface), and a Python pipeline
+**Kobo's built-in reader** (in Sideloaded Mode) is the reading app (D13; KOReader is parked as P2), and a Python pipeline
 on the computer converts and bolds books, then copies them to the Kobo over USB.
 
 `PLAN.md` is the source of truth for requirements (R#), decisions (D#), phases, risks and

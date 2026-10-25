@@ -438,7 +438,7 @@ Each step has its own automatic tests and its own commit. 🔌 marks a device ch
 | 4 ✅ | Checks | `kraken/checks.py` | Valid zip, readable OPF, `toc.ncx` present (D47), not locked (D46); a light check (`check_bolded`) on the bolded copy |
 | 5 ✅ | Inbox | `kraken/inbox.py` | Waiting files (D49, D50), names on the Kobo (D51), `sent/`, `skipped/` with a note |
 | 6 ✅ | Push | `push.py` | Books before fonts; one bad book never stops the others; summary and `--dry-run` list books; bolded copy in a temporary folder (D52) |
-| 🔌 C | Device test | | Two EPUBs sent and filed in `sent/`; real titles; bold-start at 30%, headings and addresses untouched; real Bold and Bold Italic, distinct from italics; font and size changes don't freeze; a deleted book doesn't come back; a re-dropped book replaces its copy (reading position: Q10) |
+| 🔌 C | Device test | | Two EPUBs sent and filed in `sent/`; real titles; bold-start at 30%, headings and addresses untouched; real Bold and Bold Italic, distinct from italics; font and size changes don't freeze; a deleted book doesn't come back; a re-dropped book replaces its copy (reading position: Q10). **2026-10-24: partly passed; failed on speed** (bolded files ~5× bigger; see PLAN.md log). Spike E, then a fix, then re-test |
 
 ### Three questions for you (answered 2026-10-23: all recommended)
 
