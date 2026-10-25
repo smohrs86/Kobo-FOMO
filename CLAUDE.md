@@ -33,6 +33,9 @@ its "Next up" list. **Ending a session:** update section 0 and the project log, 
   what each piece of code does and why, and gently give the correct term when one is
   used loosely.
 - **Clean, readable code** over clever code. Small, tested steps, one feature at a time.
+- **Lists in chat:** never put a numbered list inside a bullet point. The owner's terminal shows
+  nested numbers as a., b., c., so they won't match "option 1, 2, 3" in the text. Keep numbered lists
+  at the top level, or name items by a word instead of a number.
 - Record decisions as `D#` entries in `PLAN.md`, with the reason. IDs are never reused
   or renumbered; dropped items are struck through.
 - Commit and push meaningful changes without asking, **after** the privacy check below.
