@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C partly passed, failed on speed (big bolded files); Spike E books on the Kobo, waiting for the test.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C partly passed, failed on speed (big bolded files); Spike E test started: E2 crashed on a TOC jump, the rest to do.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-24
 
@@ -9,6 +9,9 @@
 
 *A handoff note, so any session (human or AI) can pick up where the last one stopped.
 Updated at the end of every working session.*
+
+**Session 2026-10-24 (evening, Spike E test started).** E2's TOC jump to INDEX: no page after 80 s, then the
+reader crashed to home (Yarrow's crash, reproduced). Paused for the night; the rest of the table is still empty.
 
 **Session 2026-10-24 (afternoon, Checkpoint C).** The device is working: firmware 4.38.23429, Sideloaded Mode,
 no Kobo account, Wi-Fi off, custom sleep screen. Milestone 1 is done; Milestone 2 steps 1–6 are built (267 tests).
@@ -27,8 +30,10 @@ two originals. Auto-sync is **off** (turned off to send the spike books): the ow
 
 **Next up, in order:**
 
-1. **Spike E (big files): test on the Kobo.** The five books are on the Kobo in `kraken-tests/`. The owner
-   follows the test steps in section 8b and fills in the table. Then decide the fix from the results.
+1. **Spike E (big files): finish the test on the Kobo.** The five books are on the Kobo in `kraken-tests/`.
+   E2's TOC result is in (crash). Next sitting, in one go so the "E2 again" check holds: **restart the Kobo**,
+   then E2's page jump to 75% and 10 page turns, then E1, E3, E4, E5 (TOC target **INDEX**; stop at 120 s),
+   then E2 again after 20–30 minutes, no restart. Then decide the fix from the results.
 2. Build the fix as Milestone 2 step 7, then **finish Checkpoint C** (re-send, speed, font change, delete,
    re-drop) and mark Milestone 2 done.
 3. **Spike C (converters)**, then **Literata** (D33), as before.
@@ -315,12 +320,12 @@ pushed through the plan on paper.*
   our own splitter confirms it in step 7.
 - **Test steps.** Restart the Kobo first. For each book: open it once and wait for the page count; then,
   with a phone stopwatch, time a TOC jump to the last chapter, a page jump to about 75%, and 10 page turns;
-  note any crash. Test **E2 first and again last** (after 20–30 minutes of using the others, no restart):
+  note any crash. The TOC target is **INDEX** (the last entry; it sits near the end of the 4th chapter file, the same in every version). Test **E2 first and again last** (after 20–30 minutes of using the others, no restart):
   if E2 is much slower the second time, memory build-up is part of the problem (the restart check).
 
   | Book | TOC jump (s) | Page jump to 75% (s) | 10 page turns (s) | Crash? |
   |---|---|---|---|---|
-  | E2 (fresh restart) | | | | |
+  | E2 (fresh restart) | ❌ no page after 80 s, then crashed to home (home at 104 s) | | | yes, TOC jump |
   | E1 | | | | |
   | E3 | | | | |
   | E4 | | | | |
@@ -527,3 +532,7 @@ A short diary of what actually happened, so future-us knows *why* things are the
   turns off the power switch (the settings file has no power options). Most likely it *was* off, because the
   sleep image is also the power-off image, and e-ink keeps the last picture with no power. A separate power-off
   image needs a system mod, so the owner parked it as **P6** (risk too high for a novelty).
+- **2026-10-24 (evening):** **Spike E test started.** After a Kobo restart, E2's TOC jump to INDEX (the last
+  entry, near the end of the 303 KB, ~20,000-tag fourth file) showed no page after 80 s, then the reader crashed
+  to home (home at 104 s). This reproduces Yarrow's crash. INDEX is now the TOC target for every version, and a
+  120 s cap was added. Paused for the night with the other books still to test.
