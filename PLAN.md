@@ -38,8 +38,9 @@ two originals. Auto-sync is **off** (turned off to send the spike books): the ow
 normal terminal, or pipe the keys in (`printf '1\n\n' | .venv/bin/kraken fonts`). Claude Code's permission
 check blocks Claude from switching on the background service, so the owner runs `kraken autosync on` / `off`.
 
-**Waiting on the owner:** nothing blocking. Unanswered: what the screen showed when the Kobo wouldn't power
-down before the second reset.
+**Waiting on the owner:** nothing blocking. The Kobo that "wouldn't power down" was very likely already off:
+the sleep image also shows when it's powered off. A quick slide tells them apart (P6). **Never hold the light
+button while sliding the power switch**: that's the factory reset.
 
 **How to run it:** `.venv/bin/kraken --help`; tests with `.venv/bin/pytest`.
 
@@ -79,7 +80,7 @@ Priority is **Must**, **Should** or **Could**, a simplified "MoSCoW" ranking.
 | R9 | No bloat: only the features listed here | Must |
 | R10 | **Pull:** copy a document from the reader back to my computer, without the bold-start formatting | Should |
 | R11 | **More fonts:** traditional press (serif) and sans-serif fonts, each with a real **Bold** (bold-start depends on it). Open-licensed only. Picked from a list with `kraken fonts`; installed or removed on the next sync | Should |
-| R12 | **Custom sleep screen:** our own graphic when the Kobo is asleep or powered off ✅ (sleep) | Should |
+| R12 | **Custom sleep screen:** our own graphic when the Kobo is asleep ✅ (also shown when powered off; a separate power-off image is parked as P6) | Should |
 | R13 | **Custom power-on screen:** our own graphic in the boot animation | Could |
 | R14 | **Auto-sync on plug-in:** when the Kobo is connected (after tapping *Connect*), `kraken push` runs by itself, ejects the Kobo safely, and shows a desktop notification | Should |
 | R15 | **Release:** kraken is released as a **snap** on the repo's GitHub Releases page. It contains only the tool: no personal graphics, settings or books (D20) | Should |
@@ -341,6 +342,11 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
   Spike D screen code.
 - **P5. Our own operating system for the Glo**, after this project is finished. First make a full image of the internal microSD card (the backup), then experiment only on a copy. Lighter ways in: an app that runs on Kobo's Linux in place of Nickel, as KOReader and Plato do. The hard part of a full OS: the e-ink display driver and its waveform files, and support for the Glo's i.MX50 chip in current Linux, which needs research.
   **Owner's choice (2026-10-24):** start with the lightest way, our own app in place of Nickel, and explore options there. **Goal: Wi-Fi sync without today's risks.** The risks (contacting Kobo, auto-updates) come from Nickel, not the Wi-Fi hardware, so with Nickel not running, Wi-Fi only talks to the owner's computer.
+- **P6. A separate power-off image**, so sleep and power-off look different. Kobo's built-in feature uses
+  the same image for both. A community mod (the ScreenSaver mod, `standby/` and `poweroff/` folders) can do it,
+  but it installs system files (`KoboRoot.tgz`), needs "Show current read" off, and isn't confirmed on 4.38 for
+  the Glo. **Owner's choice (2026-10-24):** too much risk for a novelty. Until then, tell them apart with a quick
+  slide: back on Home in about a second means asleep; a loading screen means it was off.
 
 ## 10. Glossary
 
@@ -517,3 +523,7 @@ A short diary of what actually happened, so future-us knows *why* things are the
   books went to `kraken-tests/` with kraken's safe copy, and the Kobo was ejected. To think about later:
   auto-sync always ejects, so any manual job on the Kobo means turning it off first.
 - **2026-10-24:** The owner worried that plugging in so often would wear out the Kobo's micro-USB socket, and asked about Wi-Fi sync, then about blocking Kobo's servers. **D56:** no Wi-Fi; a data-capable magnetic adapter spares the socket instead. Building our own OS for the Glo parked as P5.
+- **2026-10-24:** Before Spike E, the Kobo seemed not to power down: it stayed on the sleep image. No setting
+  turns off the power switch (the settings file has no power options). Most likely it *was* off, because the
+  sleep image is also the power-off image, and e-ink keeps the last picture with no power. A separate power-off
+  image needs a system mod, so the owner parked it as **P6** (risk too high for a novelty).
