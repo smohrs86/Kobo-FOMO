@@ -1,7 +1,7 @@
 # Kobo-FOMO: Project Plan
 
 > **Motto:** Plan twice, code once.
-> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C partly passed, failed on speed (big bolded files); Spike E next.
+> **Status:** Phases 0–1 and 3 (Design) done. Phase 2: Spikes A and D done, Spike C pending. Phase 4 (Setup) done. Phase 5 (Build): Milestone 1 done (Checkpoints A, B passed). Milestone 2: steps 1–6 built; Checkpoint C partly passed, failed on speed (big bolded files); Spike E built, waiting for the Kobo test.
 > **Resume here:** see [section 0, Where we left off](#0-where-we-left-off).
 > **Last updated:** 2026-10-24
 
@@ -25,9 +25,9 @@ On the Kobo: *Alice*, the two test books in `kraken/`, and the throwaway strengt
 
 **Next up, in order:**
 
-1. **Spike E (big files):** write a short plan for the owner to approve, then run it. Idea: four versions of
-   Yarrow (not bolded, bolded as now, a shorter marker such as `<b class="k">`, split into smaller files),
-   each tried with a TOC jump on the Kobo. Tells us whether size is the cause and which fix is enough.
+1. **Spike E (big files): test on the Kobo.** The plan is approved and the five books are built
+   (section 8b). Next: plug in the Kobo, run `make_variants.py … --send`, then the owner follows the test
+   steps in section 8b and fills in the table. Then decide the fix from the results.
 2. Build the fix as Milestone 2 step 7, then **finish Checkpoint C** (re-send, speed, font change, delete,
    re-drop) and mark Milestone 2 done.
 3. **Spike C (converters)**, then **Literata** (D33), as before.
@@ -291,6 +291,42 @@ pushed through the plan on paper.*
   The image takes the place of the current book's cover, so with no current read there is nothing to replace.
 - Only one image is kept in `.kobo/screensaver/`: with several, the Kobo picks one at random.
 
+**Spike E: why bolded books are slow** (2026-10-24, built; Kobo test pending)
+
+- **Question:** is it the bytes per chapter file, or the number of elements (tags) per file? Bolding grows both.
+  Watts's bolded files are only 174 KB, *under* the ~260 KB limit, yet its jumps were also slow, so bytes
+  alone may not be the cause. A memory setting isn't an option: there's no known one for the Adobe engine,
+  and swap would mean changing system files on the Kobo.
+- `spikes/big-files/make_variants.py` builds five versions of Yarrow at 45%, each with its own title.
+  Measured, for the largest chapter file:
+
+  | Version | Largest file | Elements in it | Tests |
+  |---|---|---|---|
+  | E1 plain | 75 KB | 152 | control |
+  | E2 bolded as now | 391 KB | 13,085 | the slow case |
+  | E3 bare `<b>` (test only: breaks D7) | 164 KB | 13,085 | bytes |
+  | E4 split by Calibre (`--flow-size=20`), then bolded | 93 KB | 3,107 | amount per file |
+  | E5 E2 as `.kepub.epub` | 391 KB | 13,085 | the Kobo's own reader |
+
+  E4: Calibre also adds a cover and renames CSS classes; all 42 TOC entries still resolve. If E4 wins,
+  our own splitter confirms it in step 7.
+- **Test steps.** Restart the Kobo first. For each book: open it once and wait for the page count; then,
+  with a phone stopwatch, time a TOC jump to the last chapter, a page jump to about 75%, and 10 page turns;
+  note any crash. Test **E2 first and again last** (after 20–30 minutes of using the others, no restart):
+  if E2 is much slower the second time, memory build-up is part of the problem (the restart check).
+
+  | Book | TOC jump (s) | Page jump to 75% (s) | 10 page turns (s) | Crash? |
+  |---|---|---|---|---|
+  | E2 (fresh restart) | | | | |
+  | E1 | | | | |
+  | E3 | | | | |
+  | E4 | | | | |
+  | E5 | | | | |
+  | E2 (again, no restart) | | | | |
+
+- **Reading the results:** E3 fast → bytes; a shorter marker is enough. E3 slow but E4 fast → amount per
+  file; step 7 splits files. E5 fast → another reader route (reopens D54). Nothing fast → rethink.
+
 ## 9. Parking lot (future ideas, not this project)
 
 Good ideas go here so they're not lost, but they don't expand this project's scope.
@@ -467,3 +503,8 @@ A short diary of what actually happened, so future-us knows *why* things are the
   bolding makes each chapter file about 5× bigger, because every word gains `<b class="kraken-bs">…</b>`.
   Yarrow's files grow from 76 to 391 KB, past the ~260–300 KB that the Adobe engine handles well (Calibre
   splits EPUB files over 260 KB for this reason). Spike E will test a shorter marker and split files.
+- **2026-10-24:** **Spike E planned and built.** Measuring both books showed Watts's bolded files are only 174 KB,
+  under the ~260 KB limit, yet were also slow, so the spike separates bytes from element count. The owner asked
+  about the Kobo's memory: no setting exists for it, and swap would need system changes, so a restart check was
+  added instead. `spikes/big-files/make_variants.py` builds E1–E5 (results table in section 8b); every version
+  passes `check_bolded`. Waiting for the Kobo test.
