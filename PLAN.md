@@ -340,6 +340,7 @@ Good ideas go here so they're not lost, but they don't expand this project's sco
 - **P4. Generated covers** for converted documents (which otherwise show as plain tiles), reusing the
   Spike D screen code.
 - **P5. Our own operating system for the Glo**, after this project is finished. First make a full image of the internal microSD card (the backup), then experiment only on a copy. Lighter ways in: an app that runs on Kobo's Linux in place of Nickel, as KOReader and Plato do. The hard part of a full OS: the e-ink display driver and its waveform files, and support for the Glo's i.MX50 chip in current Linux, which needs research.
+  **Owner's choice (2026-10-24):** start with the lightest way, our own app in place of Nickel, and explore options there. **Goal: Wi-Fi sync without today's risks.** The risks (contacting Kobo, auto-updates) come from Nickel, not the Wi-Fi hardware, so with Nickel not running, Wi-Fi only talks to the owner's computer.
 
 ## 10. Glossary
 
